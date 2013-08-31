@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="2.5" type="plugin" group="system" method="upgrade">
+	<name>PLG_MINICCK</name>
+	<author>Arkadiy Sedelnikov</author>
+	<creationDate>30.08.2013</creationDate>
+	<copyright>(C) 2013 Arkadiy Sedelnikov. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
+	<authorEmail>a.sedelnikov@gmail.com</authorEmail>
+	<authorUrl>http://argens.ru</authorUrl>
+	<version>1.1b</version>
+	<description>PLG_MINICCK_XML_DESCRIPTION</description>
+
+	<files>
+		<folder>assets</folder>
+        <folder>elements</folder>
+		<folder>minicck</folder>
+        <folder>sql</folder>
+        <folder>tmpl</folder>
+        <filename>index.html</filename>
+        <filename>README.md</filename>
+		<filename plugin="minicck">minicck.php</filename>
+	</files>
+	
+	<languages folder="language">
+        <language tag="en-GB">en-GB/en-GB.plg_system_minicck.ini</language>
+        <language tag="en-GB">en-GB/en-GB.plg_system_minicck.sys.ini</language>
+        <language tag="ru-RU">ru-RU/ru-RU.plg_system_minicck.ini</language>
+        <language tag="ru-RU">ru-RU/ru-RU.plg_system_minicck.sys.ini</language>
+    </languages>
+	
+	<install>
+		<sql>
+			<file charset="utf8" driver="mysql">sql/install.sql</file>
+		</sql>
+	</install>
+	<uninstall>
+		<sql>
+			<file charset="utf8" driver="mysql">sql/uninstall.sql</file>
+		</sql>
+	</uninstall>
+
+	<config>
+		<fields name="params" addfieldpath="/plugins/system/minicck/elements">
+			<fieldset name="basic">
+                <field
+                        name="customfields"
+                        type="customfields"
+                        default=""
+                        label=""/>
+			</fieldset>
+            <fieldset name="advanced">
+                <field
+                        name="layout"
+                        type="filelist"
+                        directory="/plugins/system/minicck/tmpl"
+                        hide_none="1"
+		                hide_default="1"
+                        exclude=".html"
+                        label="JFIELD_ALT_LAYOUT_LABEL"
+                        description="JFIELD_ALT_MODULE_LAYOUT_DESC" />
+                <field
+                        name="position"
+                        type="radio"
+                        class="btn-group"
+                        default="top"
+                        label="PLG_MINICCK_POSITION_LABEL"
+                        description="PLG_MINICCK_POSITION_LABEL_DESC">
+                    <option value="top">TOP</option>
+                    <option value="bottom">BOTTOM</option>
+                </field>
+			</fieldset>
+		</fields>
+	</config>
+</extension>
