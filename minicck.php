@@ -207,12 +207,19 @@ class plgSystemMinicck extends JPlugin
      */
     public function onBeforeRender()
     {
+        $isAdmin = JFactory::getApplication()->isAdmin();
+        $view = $this->input->getCmd('view', '');
         if (!( $this->input->getCmd('option', '') == 'com_content'
-                && $this->input->getCmd('view', '') == 'article'
+            && (
+                ($isAdmin && $view == 'article')
+                || (!$isAdmin && $view == 'form')
+            )
                 && $this->input->getCmd('layout', '') === 'edit' )
         ) return;
 
         $document = JFactory::getDocument();
+        if($isAdmin)
+        {
         $document->addScriptDeclaration('
         (function($){
             $(document).ready(function(){
@@ -222,6 +229,20 @@ class plgSystemMinicck extends JPlugin
 		    });
 		})(jQuery);
 		');
+        }
+        else
+        {
+            $document->addScriptDeclaration('
+                (function($){
+                    $(document).ready(function(){
+		            	var tab = $(\'<li class=""><a href="#minicck" data-toggle="tab">' . JText::_( 'PLG_MINICCK_LABEL' ) . '</a></li>\');
+		            	$(\'ul.nav-tabs\').append(tab);
+		            	$(\'#minicck\').appendTo($(\'div.tab-content\', \'#adminForm\'));
+		            });
+		        })(jQuery);
+		    ');
+        }
+
     }
 
 	/** Действия при удалении контента
