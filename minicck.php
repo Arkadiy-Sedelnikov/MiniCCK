@@ -98,14 +98,24 @@ class plgSystemMinicck extends JPlugin
             try
             {
                 $cleanedData = array();
-                foreach($data as $k => $v){
-                    if(is_array($v) && count($v)>0){
-                        foreach($v as $val){
-                            $cleanedData[$k][] = htmlspecialchars(strip_tags($val));
-                        }
+                foreach($data as $k => $v)
+                {
+                    $field = self::getCustomField($k);
+
+                    $className = $this->loadElement($field);
+                    if($className != false && method_exists($className,'cleanValue'))
+                    {
+                        $cleanedData[$k] = $className::cleanValue($field, $v);
                     }
                     else{
-                        $cleanedData[$k] = htmlspecialchars(strip_tags($v));
+                        if(is_array($v) && count($v)>0){
+                            foreach($v as $val){
+                                $cleanedData[$k][] = htmlspecialchars(strip_tags($val));
+                            }
+                        }
+                        else{
+                            $cleanedData[$k] = htmlspecialchars(strip_tags($v));
+                        }
                     }
                 }
 
@@ -214,21 +224,21 @@ class plgSystemMinicck extends JPlugin
                 ($isAdmin && $view == 'article')
                 || (!$isAdmin && $view == 'form')
             )
-                && $this->input->getCmd('layout', '') === 'edit' )
+            && $this->input->getCmd('layout', '') === 'edit' )
         ) return;
 
         $document = JFactory::getDocument();
         if($isAdmin)
         {
-        $document->addScriptDeclaration('
-        (function($){
-            $(document).ready(function(){
-		    	var tab = $(\'<li class=""><a href="#minicck" data-toggle="tab">' . JText::_( 'PLG_MINICCK_LABEL' ) . '</a></li>\');
-		    	$(\'#myTabTabs\').append(tab);
-		    	$(\'#minicck\').appendTo($(\'div.span10>div.tab-content\'));
-		    });
-		})(jQuery);
-		');
+            $document->addScriptDeclaration('
+                (function($){
+                    $(document).ready(function(){
+		            	var tab = $(\'<li class=""><a href="#minicck" data-toggle="tab">' . JText::_( 'PLG_MINICCK_LABEL' ) . '</a></li>\');
+		            	$(\'#myTabTabs\').append(tab);
+		            	$(\'#minicck\').appendTo($(\'div.span10>div.tab-content\'));
+		            });
+		        })(jQuery);
+		    ');
         }
         else
         {
@@ -339,16 +349,29 @@ class plgSystemMinicck extends JPlugin
     private function getValue($fname, $value)
     {
         $field = self::getCustomField($fname);
+        $className = $this->loadElement($field);
 
-        if(!is_file(JPATH_ROOT.'/plugins/system/minicck/elements/'.$field['type'].'.php'))
+        if($className != false && method_exists($className,'getValue'))
+        {
+            return $className::getValue($field, $value);
+        }
+        else
+        {
             return $value;
+        }
+    }
 
+    /** Загружаем элемент, вычисляем имя класса элемента
+     * @param $field
+     * @return bool|string
+     */
+    private function loadElement($field)
+    {
+        if(!is_file(JPATH_ROOT.'/plugins/system/minicck/elements/'.$field['type'].'.php'))
+            return false;
         include_once(JPATH_ROOT.'/plugins/system/minicck/elements/'.$field['type'].'.php');
 
         $className = 'JFormField'.ucfirst($field['type']);
-
-        $return = $className::getValue($field, $value);
-
-        return $return;
+        return $className;
     }
 }

@@ -25,7 +25,7 @@ class JFormFieldMctextarea
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
         $type = $this->attributes['type'];
-        $value = $this->value;
+        $value = htmlspecialchars_decode($this->value);
 
 
         $field = plgSystemMinicck::getCustomField($name);
@@ -41,7 +41,12 @@ class JFormFieldMctextarea
     }
 
     static function  getValue($field, $value){
-        $return = $value;
+        $return = htmlspecialchars_decode($value);
+        return $return;
+    }
+
+    static function  cleanValue($field, $value){
+        $return = htmlspecialchars($value);
         return $return;
     }
 }
