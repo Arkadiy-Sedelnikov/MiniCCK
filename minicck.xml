@@ -75,8 +75,6 @@
         <server
             type="extension"
             priority="1"
-            name="MiniCCK Updates">
-            <![CDATA[http://argens.ru/index.php?option=com_ars&view=update&task=stream&format=xml&id=2&dummy=extension.xml]]>
-        </server>
+            name="MiniCCK Updates"><![CDATA[http://argens.ru/index.php?option=com_ars&view=update&task=stream&format=xml&id=2&dummy=extension.xml]]></server>
     </updateservers>
 </extension>
