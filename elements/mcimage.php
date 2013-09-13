@@ -50,6 +50,8 @@ class JFormFieldMcimage
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
         $type = $this->attributes['type'];
+        $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
+        $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
 
 
@@ -62,10 +64,10 @@ class JFormFieldMcimage
 
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
-        $html = '<div class="control-group">';
+        $html = '<div class="control-group '.$name.'"'.$hidden.'>';
         $html .= '<label for="'.$id.'" class="control-label" title="" >'.$label.'</label>';
         $html .= '<div class="controls">';
-        $html .= '<input type="text" id="'.$id.'" name="'.$fieldname.'" value="'.$value.'" class="input-small">';
+        $html .= '<input type="text" id="'.$id.'" name="'.$fieldname.'" value="'.$value.'" class="input-small '.$name.'"'.$disabled.'>';
         $html .= '<a class="modal btn" title="' . JText::_('JLIB_FORM_BUTTON_SELECT') . '" href="'
             //  index.php?option=com_media&view=images&tmpl=component&asset=com_content&author=&fieldid=jform_images_image_intro&folder=
             .  'index.php?option=com_media&amp;view=images&amp;tmpl=component&amp;asset=com_content&amp;author=&amp;fieldid=' . $id . '&amp;folder=' . $directory . '"'

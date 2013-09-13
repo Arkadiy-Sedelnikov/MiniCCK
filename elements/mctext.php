@@ -25,16 +25,18 @@ class JFormFieldMctext
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
         $type = $this->attributes['type'];
+        $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
+        $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
 
 
         $field = plgSystemMinicck::getCustomField($name);
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
-        $html = '<div class="control-group">';
+        $html = '<div class="control-group '.$name.'"'.$hidden.'>';
         $html .= '<label for="'.$id.'" class="control-label" title="" >'.$label.'</label>';
         $html .= '<div class="controls">';
-        $html .= '<input type="text" id="'.$id.'" name="'.$fieldname.'" value="'.$value.'" class="inputbox">';
+        $html .= '<input type="text" id="'.$id.'" name="'.$fieldname.'" value="'.$value.'" class="inputbox '.$name.'"'.$disabled.'>';
         $html .= '</div>';
         $html .= '</div>';
         return $html;

@@ -172,3 +172,30 @@ function trim(string)
     string = string.replace(/(^\s+)|(\s+$)/g, "");
     return string;
 }
+
+function reloadMinicckFields(element){
+    var type = jQuery(element).val();
+    if (type == ''){
+        return;
+    }
+
+    var typeFields = minicckTypeFields[type];
+
+    var count = 0;
+    for (var key in typeFields){count++;}
+    if(count == 0)
+        return;
+
+    jQuery('div.control-group', '#minicck').not('#minicck_content_type_contayner').hide();
+    jQuery('input', '#minicck').attr('disabled','disabled');
+    jQuery('select', '#minicck').not('#minicckcontent_type').attr('disabled','disabled');
+    jQuery('textarea', '#minicck').attr('disabled','disabled');
+    for (var i=0; i < typeFields.length; i++)
+    {
+        var cont = jQuery('div.control-group.'+typeFields[i]);
+        cont.show();
+        jQuery('input', cont).removeAttr('disabled');
+        jQuery('select', cont).removeAttr('disabled');
+        jQuery('textarea', cont).removeAttr('disabled');
+    }
+}

@@ -10,6 +10,7 @@ defined('_JEXEC') or die;
 class plgSystemMinicck extends JPlugin
 {
     private static $customfields = null;
+    private static $contentTypes = null;
 
     private $input;
 
@@ -19,6 +20,9 @@ class plgSystemMinicck extends JPlugin
 		$this->loadLanguage();
         if(!self::$customfields){
             $this->setCustomFields($config);
+        }
+        if(!self::$contentTypes){
+            $this->setContentTypes($config);
         }
         $this->input = new JInput();
 	}
@@ -31,6 +35,21 @@ class plgSystemMinicck extends JPlugin
         return self::$customfields[$name];
     }
 
+    private function setContentTypes($config){
+        $params = json_decode($config['params']);
+        $types = $params->content_types;
+        if(!is_array($types) || count($types) == 0){
+            return;
+        }
+
+        $newParams = array();
+        foreach($types as $type)
+        {
+            $newParams[$type->name] = $type;
+        }
+        self::$contentTypes = $newParams;
+    }
+
     private function setCustomFields($config){
         $customfields = json_decode($config['params']);
         $customfields = $customfields->customfields;
@@ -39,13 +58,7 @@ class plgSystemMinicck extends JPlugin
         }
 
         $document = JFactory::getDocument();
-        jimport( 'joomla.version' );  $jversion = new JVersion;
-        if(version_compare( $jversion->getShortVersion(), '3.0.0', 'ge' ) ){
-            $document->addScript('/plugins/system/minicck/assets/js/minicck_jq.js');
-        }
-        else{
-            $document->addScript('/plugins/system/minicck/assets/js/minicck_moo.js');
-        }
+        $document->addScript('/plugins/system/minicck/assets/js/minicck_jq.js');
 
         $newFields = array();
         foreach($customfields as $customfield){
@@ -181,8 +194,40 @@ class plgSystemMinicck extends JPlugin
 
         $dataMinicck = (!empty($results)) ? json_decode($results, true) : array();
 
-        $html = '<div class="tab-pane" id="minicck">';
+        $options = $this->gerContemtTypeOptions();
+        if(!$options){
+            echo JText::_('PLG_MINICCK_NO_TYPES_CREATED');
+            return false;
+        }
 
+var_dump($contentType);
+        $contentType = (!empty($dataMinicck['content_type'])) ? $dataMinicck['content_type'] : '';
+        $contentTypeFields = self::$contentTypes[$contentType]->fields;
+
+        $js = 'var minicckTypeFields = [];';
+        foreach (self::$contentTypes as $type)
+        {
+            if(count($type->fields)){
+                $js .= "\n minicckTypeFields['$type->name']=[";
+                foreach($type->fields as $k => $v){
+                    $js .= "'$k', ";
+                }
+                $js .= "];";
+            }
+        }
+        $document = JFactory::getDocument();
+        $document->addScriptDeclaration($js);
+
+        $label = JText::_('PLG_MINICCK_TYPE_CONTENT');
+        $select = JHTML::_('select.genericlist', $options, 'minicck[content_type]', ' class="type inputbox" onchange="reloadMinicckFields(this)"', 'value', 'text', $contentType);
+        $html = <<<HTML
+        <div class="tab-pane" id="minicck">
+            <div class="control-group" id="minicck_content_type_contayner">
+                <label for="minicck_content_types" class="control-label" title="" >$label</label>
+                <div class="controls">$select</div>
+            </div>
+        <hr style="clear:both"/>
+HTML;
             if(count(self::$customfields)>0)
             {
                 foreach(self::$customfields as $customfield)
@@ -198,6 +243,12 @@ class plgSystemMinicck extends JPlugin
                     $attributes['name'] = $customfield['name'];
                     $attributes['label'] = $customfield['title'];
                     $attributes['type'] = $customfield['type'];
+                    $attributes['disabled'] = $attributes['hidden'] = false;
+
+                    if(empty($contentType) || !isset($contentTypeFields->$customfield['name']))
+                    {
+                        $attributes['disabled'] = $attributes['hidden'] = true;
+                    }
 
                     $value = (isset($dataMinicck[$customfield['name']])) ? $dataMinicck[$customfield['name']] : null;
 
@@ -373,5 +424,21 @@ class plgSystemMinicck extends JPlugin
 
         $className = 'JFormField'.ucfirst($field['type']);
         return $className;
+    }
+
+    private function gerContemtTypeOptions()
+    {
+        if (is_array(self::$contentTypes) && count(self::$contentTypes))
+        {
+            $options = array();
+            $options[] = JHtml::_('select.option', '', JText::_('JSELECT'));
+
+            foreach (self::$contentTypes as $type)
+            {
+                $options[] = JHtml::_('select.option', $type->name, $type->title);
+            }
+            return $options;
+        }
+        return false;
     }
 }

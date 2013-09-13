@@ -25,6 +25,8 @@ class JFormFieldMcselect
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
         $type = $this->attributes['type'];
+        $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
+        $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
 
 
@@ -40,10 +42,10 @@ class JFormFieldMcselect
 
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
-        $html = '<div class="control-group">';
+        $html = '<div class="control-group '.$name.'"'.$hidden.'>';
         $html .= '<label for="'.$id.'" class="control-label" title="" >'.$label.'</label>';
         $html .= '<div class="controls">';
-        $html .= JHTML::_('select.genericlist', $options, $fieldname, 'id="'.$id.'" class="type inputbox"', 'value', 'text', $value);
+        $html .= JHTML::_('select.genericlist', $options, $fieldname, 'id="'.$id.'"'.$disabled.' class="type inputbox '.$name.'"', 'value', 'text', $value);
         $html .= '</div>';
         $html .= '</div>';
         return $html;

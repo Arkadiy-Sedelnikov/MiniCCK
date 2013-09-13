@@ -24,11 +24,13 @@ class JFormFieldMccheckbox
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
         $type = $this->attributes['type'];
+        $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
+        $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
         $field = plgSystemMinicck::getCustomField($name);
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
-        $html = '<div class="control-group">';
+        $html = '<div class="control-group '.$name.'"'.$hidden.'>';
         $html .= '<label for="'.$id.'" class="control-label" title="" >'.$label.'</label>';
         $html .= '<div class="controls" id="'.$id.'">';
 
@@ -38,7 +40,7 @@ class JFormFieldMccheckbox
                 $checked = (is_array($value) && in_array($key, $value)) ? 'checked="checked"' : '';
                 $html .= '
                 <label for="'.$id.'" id="'.$id.'-lbl" class="checkbox">'.$val.'
-                <input style="float: left;" type="checkbox" name="'.$fieldname.'[]" id="'.$id.'" value="'.$key.'" '.$checked.' class="checkbox"/>
+                <input style="float: left;" type="checkbox" name="'.$fieldname.'[]" id="'.$id.'" value="'.$key.'" '.$checked.' class="checkbox '.$name.'"'.$disabled.'/>
                 </label>';
                 //$options[] = JHtml::_('select.option', $key,     JText::_($val));
             }
