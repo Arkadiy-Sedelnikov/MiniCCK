@@ -48,6 +48,13 @@
                         default=""
                         label=""/>
 			</fieldset>
+            <fieldset name="MINICCK_TYPES_CONTENT">
+                <field
+                        name="content_types"
+                        type="types"
+                        default=""
+                        label=""/>
+            </fieldset>
             <fieldset name="advanced">
                 <field
                         name="layout"
