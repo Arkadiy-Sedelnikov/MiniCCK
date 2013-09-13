@@ -17,25 +17,32 @@ class plgSystemMinicck extends JPlugin
 	public function __construct(& $subject, $config)
 	{
 		parent::__construct($subject, $config);
+
 		$this->loadLanguage();
-        if(!self::$customfields){
-            $this->setCustomFields($config);
-        }
-        if(!self::$contentTypes){
+
+        if(!self::$contentTypes)
+        {
             $this->setContentTypes($config);
+        }
+        if(!self::$customfields)
+        {
+            $this->setCustomFields($config);
         }
         $this->input = new JInput();
 	}
 
-    static function getCustomFields(){
+    static function getCustomFields()
+    {
         return self::$customfields;
     }
 
-    static function getCustomField($name){
+    static function getCustomField($name)
+    {
         return self::$customfields[$name];
     }
 
-    private function setContentTypes($config){
+    private function setContentTypes($config)
+    {
         $params = json_decode($config['params']);
         $types = $params->content_types;
         if(!is_array($types) || count($types) == 0){
@@ -200,7 +207,6 @@ class plgSystemMinicck extends JPlugin
             return false;
         }
 
-var_dump($contentType);
         $contentType = (!empty($dataMinicck['content_type'])) ? $dataMinicck['content_type'] : '';
         $contentTypeFields = self::$contentTypes[$contentType]->fields;
 
@@ -362,26 +368,22 @@ HTML;
 
         if(empty($result)) return;
 
-        $$result = json_decode($result);
+        $result = json_decode($result);
 
-        if(!is_object($$result) || !count($$result)) return;
+        if(!is_object($result) || !count($result)) return;
 
 		$doc = JFactory::getDocument();
 		$doc->addStyleSheet(JURI::base(true).'/plugins/system/minicck/minicck/minicck.css');
-		
-		jimport('joomla.html.grid');
-		$table = new JGrid();
-
-		// Create columns
-		$table->addColumn('attr')
-			->addColumn('value');	
 
 		// populate
 		$rownr = 0;
 
         $fields = self::$customfields;
 
-        $layout = $this->params->get('layout', 'default.php');
+        $layout = $this->getLauout($result->content_type);
+
+        unset($result->content_type);
+
         $position = $this->params->get('position', 'top');
 
         ob_start();
@@ -396,6 +398,18 @@ HTML;
         }
 
 	}
+
+    private function getLauout($contentType)
+    {
+        $layout = $this->params->get('layout', 'default.php');
+
+        if(!empty(self::$contentTypes[$contentType]->tmpl))
+        {
+            $layout = self::$contentTypes[$contentType]->tmpl;
+        }
+
+        return $layout;
+    }
 
     private function getValue($fname, $value)
     {

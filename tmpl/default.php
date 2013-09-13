@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 <div class="infoblock twocols">
     <ul>
         <?php
-        foreach ($$result as $attr => $value) :
+        foreach ($result as $attr => $value) :
             $field = $fields[$attr];
             $label = $field['title'];
             $val = $this->getValue($attr, $value);
