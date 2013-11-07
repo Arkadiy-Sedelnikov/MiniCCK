@@ -292,7 +292,15 @@ HTML;
                     $(document).ready(function(){
 		            	var tab = $(\'<li class=""><a href="#minicck" data-toggle="tab">' . JText::_( 'PLG_MINICCK_LABEL' ) . '</a></li>\');
 		            	$(\'#myTabTabs\').append(tab);
-		            	$(\'#minicck\').appendTo($(\'div.span10>div.tab-content\'));
+
+		            	if($(\'#myTabContent\').length)
+		            	{
+                            $(\'#minicck\').appendTo($(\'#myTabContent\'));
+                        }
+                        else if($(\'div.span10>div.tab-content\').length)
+		            	{
+                            $(\'#minicck\').appendTo($(\'div.span10>div.tab-content\'));
+                        }
 		            });
 		        })(jQuery);
 		    ');
