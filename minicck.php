@@ -201,10 +201,10 @@ class plgSystemMinicck extends JPlugin
 
         $dataMinicck = (!empty($results)) ? json_decode($results, true) : array();
 
-        $options = $this->gerContemtTypeOptions();
+        $options = $this->gerContentTypeOptions();
         if(!$options){
             echo JText::_('PLG_MINICCK_NO_TYPES_CREATED');
-            return false;
+            return true;
         }
 
         $contentType = (!empty($dataMinicck['content_type'])) ? $dataMinicck['content_type'] : '';
@@ -448,7 +448,7 @@ HTML;
         return $className;
     }
 
-    private function gerContemtTypeOptions()
+    private function gerContentTypeOptions()
     {
         if (is_array(self::$contentTypes) && count(self::$contentTypes))
         {
