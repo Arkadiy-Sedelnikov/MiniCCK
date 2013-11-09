@@ -12,11 +12,22 @@ class plgSystemMinicck extends JPlugin
     private static $customfields = null;
     private static $contentTypes = null;
 
-    private $input;
+    private
+        $input,
+        $isAdmin;
 
 	public function __construct(& $subject, $config)
 	{
 		parent::__construct($subject, $config);
+
+        $this->input = new JInput();
+
+        $this->isAdmin = JFactory::getApplication()->isAdmin();
+        $view = $this->input->getCmd('view', '');
+        $option = $this->input->getCmd('option', '');
+
+        if ($this->isAdmin && !($option == 'com_content' && $view == 'article'))
+            return;
 
 		$this->loadLanguage();
 
@@ -28,7 +39,6 @@ class plgSystemMinicck extends JPlugin
         {
             $this->setCustomFields($config);
         }
-        $this->input = new JInput();
 	}
 
     static function getCustomFields()
@@ -57,15 +67,22 @@ class plgSystemMinicck extends JPlugin
         self::$contentTypes = $newParams;
     }
 
-    private function setCustomFields($config){
+    private function setCustomFields($config)
+    {
         $customfields = json_decode($config['params']);
         $customfields = $customfields->customfields;
         if(!is_array($customfields) || count($customfields) == 0){
             return;
         }
 
-        $document = JFactory::getDocument();
-        $document->addScript('/plugins/system/minicck/assets/js/minicck_jq.js');
+        $view = $this->input->getCmd('view', '');
+        $layout = $this->input->getCmd('layout', '');
+
+        if($this->isAdmin || ($view == 'form' && $layout == 'edit'))
+        {
+            $document = JFactory::getDocument();
+            $document->addScript('/plugins/system/minicck/assets/js/minicck_jq.js');
+        }
 
         $newFields = array();
         foreach($customfields as $customfield){
@@ -380,8 +397,10 @@ HTML;
 
         if(!is_object($result) || !count($result)) return;
 
-		$doc = JFactory::getDocument();
-		$doc->addStyleSheet(JURI::base(true).'/plugins/system/minicck/minicck/minicck.css');
+        if($this->params->get('load_css', '1') == 1){
+            $doc = JFactory::getDocument();
+            $doc->addStyleSheet(JURI::base(true).'/plugins/system/minicck/minicck/minicck.css');
+        }
 
 		// populate
 		$rownr = 0;

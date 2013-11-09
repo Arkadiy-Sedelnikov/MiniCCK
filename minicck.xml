@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
 	<authorEmail>a.sedelnikov@gmail.com</authorEmail>
 	<authorUrl>http://argens.ru</authorUrl>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<description>PLG_MINICCK_XML_DESCRIPTION</description>
 
 	<files>
@@ -74,6 +74,16 @@
                         description="PLG_MINICCK_POSITION_LABEL_DESC">
                     <option value="top">TOP</option>
                     <option value="bottom">BOTTOM</option>
+                </field>
+                <field
+                        name="load_css"
+                        type="radio"
+                        class="btn-group"
+                        default="1"
+                        label="PLG_MINICCK_LOAD_CSS"
+                        description="PLG_MINICCK_LOAD_CSS_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
                 </field>
 			</fieldset>
 		</fields>
