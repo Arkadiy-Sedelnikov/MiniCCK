@@ -14,103 +14,31 @@ class plgSystemMinicck extends JPlugin
 
     private
         $input,
-        $isAdmin;
+        $isAdmin,
+        $config;
+
 
 	public function __construct(& $subject, $config)
 	{
 		parent::__construct($subject, $config);
 
         $this->input = new JInput();
-
+        $this->config = $config;
         $this->isAdmin = JFactory::getApplication()->isAdmin();
-        $view = $this->input->getCmd('view', '');
-        $option = $this->input->getCmd('option', '');
-
-        if ($this->isAdmin && !($option == 'com_content' && $view == 'article'))
-            return;
-
 		$this->loadLanguage();
-
-        if(!self::$contentTypes)
-        {
-            $this->setContentTypes($config);
-        }
-        if(!self::$customfields)
-        {
-            $this->setCustomFields($config);
-        }
 	}
 
-    static function getCustomFields()
+    function onAfterDispatch()
     {
-        return self::$customfields;
-    }
-
-    static function getCustomField($name)
-    {
-        return self::$customfields[$name];
-    }
-
-    private function setContentTypes($config)
-    {
-        $params = json_decode($config['params']);
-        $types = $params->content_types;
-        if(!is_array($types) || count($types) == 0){
-            return;
-        }
-
-        $newParams = array();
-        foreach($types as $type)
-        {
-            $newParams[$type->name] = $type;
-        }
-        self::$contentTypes = $newParams;
-    }
-
-    private function setCustomFields($config)
-    {
-        $customfields = json_decode($config['params']);
-        $customfields = $customfields->customfields;
-        if(!is_array($customfields) || count($customfields) == 0){
-            return;
-        }
-
+        $option = $this->input->getCmd('option', '');
         $view = $this->input->getCmd('view', '');
         $layout = $this->input->getCmd('layout', '');
 
-        if($this->isAdmin || ($view == 'form' && $layout == 'edit'))
+        if($this->isAdmin || ($option == 'com_content' && $view == 'form' && $layout == 'edit'))
         {
             $document = JFactory::getDocument();
             $document->addScript('/plugins/system/minicck/assets/js/minicck_jq.js');
         }
-
-        $newFields = array();
-        foreach($customfields as $customfield){
-            $k = $customfield->name;
-            $newFields[$k]['name'] = $customfield->name;
-            $newFields[$k]['title'] = $customfield->title;
-            $newFields[$k]['type'] = $customfield->type;
-
-            if(in_array($customfield->type, array('mcselect', 'mcradio', 'mccheckbox'))){
-                $tmpRows = array();
-                if(!empty($customfield->params)){
-                    $tmpRows = explode("\n", $customfield->params);
-                    if(count($tmpRows)>0){
-                        $elements = array();
-                        foreach($tmpRows as $tmpRow){
-                          $elements = explode("::", $tmpRow);
-                            if(count($elements) > 1){
-                                $newFields[$k]['params'][$elements[0]] = trim($elements[1]);
-                            }
-                        }
-                    }
-                }
-            }
-            else{
-                $newFields[$k]['params'] = $customfield->params;
-            }
-        }
-        self::$customfields = $newFields;
     }
 
     /** Сохранение данных
@@ -122,8 +50,11 @@ class plgSystemMinicck extends JPlugin
      */
     public function onContentAfterSave($context, $article, $isNew)
     {
+        if($context !== 'com_content.article' && $context !== 'com_content.form')
+            return true;
+
         $articleId	= $article->id;
-        $input = new JInput();
+
         $data = (
             isset($_POST['minicck'])
             && is_array($_POST['minicck'])
@@ -144,13 +75,17 @@ class plgSystemMinicck extends JPlugin
                     {
                         $cleanedData[$k] = $className::cleanValue($field, $v);
                     }
-                    else{
-                        if(is_array($v) && count($v)>0){
-                            foreach($v as $val){
+                    else
+                    {
+                        if(is_array($v) && count($v)>0)
+                        {
+                            foreach($v as $val)
+                            {
                                 $cleanedData[$k][] = htmlspecialchars(strip_tags($val));
                             }
                         }
-                        else{
+                        else
+                        {
                             $cleanedData[$k] = htmlspecialchars(strip_tags($v));
                         }
                     }
@@ -163,7 +98,8 @@ class plgSystemMinicck extends JPlugin
                 $query->delete('#__minicck');
                 $query->where('content_id = ' . $db->Quote($articleId));
                 $db->setQuery($query);
-                if (!$db->query()) {
+                if (!$db->query())
+                {
                     throw new Exception($db->getErrorMsg());
                 }
 
@@ -173,7 +109,8 @@ class plgSystemMinicck extends JPlugin
                 $query->values($articleId.', '.$db->quote($data));
                 $db->setQuery($query);
 
-                if (!$db->query()) {
+                if (!$db->query())
+                {
                     throw new Exception($db->getErrorMsg());
                 }
             }
@@ -192,17 +129,32 @@ class plgSystemMinicck extends JPlugin
      * @return bool
      */
     function onContentPrepareData($context, $data)
-	{
+    {
         if (!($context == 'com_content.article'
-            && $this->input->getCmd('layout', '') === 'edit' )
-            || !is_object($data)
+                && $this->input->getCmd('layout', '') === 'edit')
+            || (!is_object($data) && !is_array($data))
         ) return true;
 
-		$articleId = isset($data->id) ? $data->id : 0;
+        if(!self::$contentTypes)
+        {
+            $this->setContentTypes();
+        }
+
+        $articleId = 0;
+
+        if(is_object($data) && !empty($data->id))
+        {
+            $articleId = (int)$data->id;
+        }
+        else if(is_array($data) && !empty($data["id"]))
+        {
+            $articleId = (int)$data["id"];
+        }
 
         $results = null;
 
-        if($articleId > 0){
+        if($articleId > 0)
+        {
             $db = JFactory::getDbo();
             $query = $db->getQuery(true);
             $query->select('field_values');
@@ -211,7 +163,8 @@ class plgSystemMinicck extends JPlugin
             $db->setQuery($query);
             $results = $db->loadResult();
 
-            if ($db->getErrorNum()) {
+            if ($db->getErrorNum())
+            {
                 $this->_subject->setError($db->getErrorMsg()); return false;
             }
         }
@@ -219,20 +172,30 @@ class plgSystemMinicck extends JPlugin
         $dataMinicck = (!empty($results)) ? json_decode($results, true) : array();
 
         $options = $this->gerContentTypeOptions();
-        if(!$options){
+        if(!$options)
+        {
             echo JText::_('PLG_MINICCK_NO_TYPES_CREATED');
             return true;
         }
 
         $contentType = (!empty($dataMinicck['content_type'])) ? $dataMinicck['content_type'] : '';
-        $contentTypeFields = self::$contentTypes[$contentType]->fields;
+        if($contentType == '')
+        {
+            $contentTypeFields = new stdClass();
+        }
+        else
+        {
+            $contentTypeFields = self::$contentTypes[$contentType]->fields;
+        }
 
         $js = 'var minicckTypeFields = [];';
         foreach (self::$contentTypes as $type)
         {
-            if(count($type->fields)){
+            if(count($type->fields))
+            {
                 $js .= "\n minicckTypeFields['$type->name']=[";
-                foreach($type->fields as $k => $v){
+                foreach($type->fields as $k => $v)
+                {
                     $js .= "'$k', ";
                 }
                 $js .= "];";
@@ -251,40 +214,46 @@ class plgSystemMinicck extends JPlugin
             </div>
         <hr style="clear:both"/>
 HTML;
-            if(count(self::$customfields)>0)
+
+        if(!self::$customfields)
+        {
+            $this->setCustomFields();
+        }
+
+        if(count(self::$customfields)>0)
+        {
+            foreach(self::$customfields as $customfield)
             {
-                foreach(self::$customfields as $customfield)
+                if(!is_file(JPATH_ROOT.'/plugins/system/minicck/elements/'.$customfield['type'].'.php'))
+                    continue;
+
+                include_once(JPATH_ROOT.'/plugins/system/minicck/elements/'.$customfield['type'].'.php');
+
+                $className = 'JFormField'.ucfirst($customfield['type']);
+
+                $attributes = array();
+                $attributes['name'] = $customfield['name'];
+                $attributes['label'] = $customfield['title'];
+                $attributes['type'] = $customfield['type'];
+                $attributes['disabled'] = $attributes['hidden'] = false;
+
+                if(empty($contentType) || !isset($contentTypeFields->$customfield['name']))
                 {
-                    if(!is_file(JPATH_ROOT.'/plugins/system/minicck/elements/'.$customfield['type'].'.php'))
-                        continue;
-
-                    include_once(JPATH_ROOT.'/plugins/system/minicck/elements/'.$customfield['type'].'.php');
-
-                    $className = 'JFormField'.ucfirst($customfield['type']);
-
-                    $attributes = array();
-                    $attributes['name'] = $customfield['name'];
-                    $attributes['label'] = $customfield['title'];
-                    $attributes['type'] = $customfield['type'];
-                    $attributes['disabled'] = $attributes['hidden'] = false;
-
-                    if(empty($contentType) || !isset($contentTypeFields->$customfield['name']))
-                    {
-                        $attributes['disabled'] = $attributes['hidden'] = true;
-                    }
-
-                    $value = (isset($dataMinicck[$customfield['name']])) ? $dataMinicck[$customfield['name']] : null;
-
-                    $element = new $className('minicck['.$attributes['name'].']', $attributes, $value);
-
-                    $html .= $element->getInput();
+                    $attributes['disabled'] = $attributes['hidden'] = true;
                 }
+
+                $value = (isset($dataMinicck[$customfield['name']])) ? $dataMinicck[$customfield['name']] : null;
+
+                $element = new $className('minicck['.$attributes['name'].']', $attributes, $value);
+
+                $html .= $element->getInput();
             }
+        }
         $html .= '</div>';
 
         echo $html;
-		return true;
-	}
+        return true;
+    }
 
     /** Действия с табами в редактировании контента
      * @return
@@ -337,41 +306,44 @@ HTML;
 
     }
 
-	/** Действия при удалении контента
-	 * @param	string		The context of the content passed to the plugin (added in 1.6)
-	 * @param	object		A JTableContent object
-	 * @since   2.5
-	 */
-	public function onContentAfterDelete($context, $article)
-	{
-		
-		$articleId	= $article->id;
-		if ($articleId)
-		{
-			try
-			{
-				$db = JFactory::getDbo();
+    /** Действия при удалении контента
+     * @param	string		The context of the content passed to the plugin (added in 1.6)
+     * @param	object		A JTableContent object
+     * @since   2.5
+     */
+    public function onContentAfterDelete($context, $article)
+    {
 
-				$query = $db->getQuery(true);
-				$query->delete();
-				$query->from('#__minicck');
-				$query->where('content_id = ' . $db->Quote($articleId));
-				$db->setQuery($query);
+        if ($context != 'com_content.article')
+            return true;
 
-				if (!$db->query())
-				{
-					throw new Exception($db->getErrorMsg());
-				}
-			}
-			catch (Exception $e)
-			{
-				$this->_subject->setError($e->getMessage());
-				return false;
-			}
-		}
+        $articleId	= $article->id;
+        if ($articleId)
+        {
+            try
+            {
+                $db = JFactory::getDbo();
 
-		return true;
-	}
+                $query = $db->getQuery(true);
+                $query->delete();
+                $query->from('#__minicck');
+                $query->where('content_id = ' . $db->Quote($articleId));
+                $db->setQuery($query);
+
+                if (!$db->query())
+                {
+                    throw new Exception($db->getErrorMsg());
+                }
+            }
+            catch (Exception $e)
+            {
+                $this->_subject->setError($e->getMessage());
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /** Вывод на фронте
      * @param $context
@@ -380,7 +352,7 @@ HTML;
      * @param int $page
      */
     public function onContentPrepare($context, &$article, &$params, $page = 0)
-	{
+    {
         if($context != 'com_content.article') return;
 
         $db = JFactory::getDbo();
@@ -402,8 +374,12 @@ HTML;
             $doc->addStyleSheet(JURI::base(true).'/plugins/system/minicck/minicck/minicck.css');
         }
 
-		// populate
-		$rownr = 0;
+        if(!self::$customfields)
+        {
+            $this->setCustomFields();
+        }
+        // populate
+        $rownr = 0;
 
         $fields = self::$customfields;
 
@@ -414,21 +390,99 @@ HTML;
         $position = $this->params->get('position', 'top');
 
         ob_start();
-            require JPATH_ROOT.'/plugins/system/minicck/tmpl/'.$layout;
+        require JPATH_ROOT.'/plugins/system/minicck/tmpl/'.$layout;
         $html = ob_get_clean();
 
-        if($position == 'top'){
+        if($position == 'top')
+        {
             $article->text = $html.$article->text;
         }
-        else{
+        else
+        {
             $article->text = $article->text.$html;
         }
 
-	}
+    }
+
+    static function getCustomFields()
+    {
+        return self::$customfields;
+    }
+
+    static function getCustomField($name)
+    {
+        return self::$customfields[$name];
+    }
+
+    private function setContentTypes()
+    {
+        $params = json_decode($this->config['params']);
+        $types = $params->content_types;
+        if(!is_array($types) || count($types) == 0)
+        {
+            return;
+        }
+
+        $newParams = array();
+        foreach($types as $type)
+        {
+            $newParams[$type->name] = $type;
+        }
+        self::$contentTypes = $newParams;
+    }
+
+    private function setCustomFields()
+    {
+        $customfields = json_decode($this->config['params']);
+        $customfields = $customfields->customfields;
+        if(!is_array($customfields) || count($customfields) == 0){
+            return;
+        }
+
+        $newFields = array();
+        foreach($customfields as $customfield)
+        {
+            $k = $customfield->name;
+            $newFields[$k]['name'] = $customfield->name;
+            $newFields[$k]['title'] = $customfield->title;
+            $newFields[$k]['type'] = $customfield->type;
+
+            if(in_array($customfield->type, array('mcselect', 'mcradio', 'mccheckbox')))
+            {
+                $tmpRows = array();
+                if(!empty($customfield->params))
+                {
+                    $tmpRows = explode("\n", $customfield->params);
+                    if(count($tmpRows)>0)
+                    {
+                        $elements = array();
+                        foreach($tmpRows as $tmpRow)
+                        {
+                          $elements = explode("::", $tmpRow);
+                            if(count($elements) > 1)
+                            {
+                                $newFields[$k]['params'][$elements[0]] = trim($elements[1]);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                $newFields[$k]['params'] = $customfield->params;
+            }
+        }
+        self::$customfields = $newFields;
+    }
 
     private function getLauout($contentType)
     {
         $layout = $this->params->get('layout', 'default.php');
+
+        if(!self::$contentTypes)
+        {
+            $this->setContentTypes();
+        }
 
         if(!empty(self::$contentTypes[$contentType]->tmpl))
         {
@@ -469,6 +523,11 @@ HTML;
 
     private function gerContentTypeOptions()
     {
+        if(!self::$contentTypes)
+        {
+            $this->setContentTypes();
+        }
+
         if (is_array(self::$contentTypes) && count(self::$contentTypes))
         {
             $options = array();
