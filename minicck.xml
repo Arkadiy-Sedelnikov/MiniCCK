@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
 	<authorEmail>a.sedelnikov@gmail.com</authorEmail>
 	<authorUrl>http://argens.ru</authorUrl>
-	<version>1.2.2</version>
+	<version>1.2.3</version>
 	<description>PLG_MINICCK_XML_DESCRIPTION</description>
 
 	<files>
@@ -17,7 +17,6 @@
         <folder>sql</folder>
         <folder>tmpl</folder>
         <filename>index.html</filename>
-        <filename>README.md</filename>
 		<filename plugin="minicck">minicck.php</filename>
 	</files>
 	
