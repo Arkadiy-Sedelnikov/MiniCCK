@@ -195,7 +195,7 @@ function reloadMinicckFields(element){
         var cont = jQuery('div.control-group.'+typeFields[i]);
         cont.show();
         jQuery('input', cont).removeAttr('disabled');
-        jQuery('select', cont).removeAttr('disabled');
+        jQuery('select', cont).removeAttr('disabled').trigger("liszt:updated");
         jQuery('textarea', cont).removeAttr('disabled');
     }
 }
