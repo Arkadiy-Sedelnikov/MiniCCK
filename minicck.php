@@ -15,7 +15,8 @@ class plgSystemMinicck extends JPlugin
     private
         $input,
         $isAdmin,
-        $config;
+        $config,
+        $context;
 
 
 	public function __construct(& $subject, $config)
@@ -24,10 +25,14 @@ class plgSystemMinicck extends JPlugin
 
         $this->input = new JInput();
         $this->config = $config;
+        $this->config['params'] = json_decode($this->config['params']);
         $this->isAdmin = JFactory::getApplication()->isAdmin();
 		$this->loadLanguage();
 	}
 
+    /**
+     * Добвление скрипта в форму редактирования материала
+     */
     function onAfterDispatch()
     {
         $option = $this->input->getCmd('option', '');
@@ -353,7 +358,14 @@ HTML;
      */
     public function onContentPrepare($context, &$article, &$params, $page = 0)
     {
-        if($context != 'com_content.article') return;
+        $config = $this->config["params"];
+
+        if(($context != 'com_content.article' && $context != 'com_content.category')
+            || ($context == 'com_content.article' && !$config->allow_in_content)
+            || ($context == 'com_content.category' && !$config->allow_in_category)
+        ){
+            return;
+        }
 
         $db = JFactory::getDbo();
         $q = $db->getQuery(true);
@@ -369,39 +381,65 @@ HTML;
 
         if(!is_object($result) || !count($result)) return;
 
-        if($this->params->get('load_css', '1') == 1){
-            $doc = JFactory::getDocument();
-            $doc->addStyleSheet(JURI::base(true).'/plugins/system/minicck/minicck/minicck.css');
-        }
+        $this->context = $context;
+        $isCategory = ($this->context == 'com_content.category');
+        $context = $isCategory ? 'category' : 'content';
 
         if(!self::$customfields)
         {
             $this->setCustomFields();
         }
-        // populate
-        $rownr = 0;
 
-        $fields = self::$customfields;
+        if(!self::$contentTypes)
+        {
+            $this->setContentTypes();
+        }
 
-        $layout = $this->getLauout($result->content_type);
+        $content_type = $result->content_type;
+
+        $typeFields = self::$contentTypes[$content_type]->fields;
 
         unset($result->content_type);
 
-        $position = $this->params->get('position', 'top');
-
-        ob_start();
-        require JPATH_ROOT.'/plugins/system/minicck/tmpl/'.$layout;
-        $html = ob_get_clean();
-
-        if($position == 'top')
+        foreach($result as $k => $v)
         {
-            $article->text = $html.$article->text;
+            if(!isset($typeFields->$k->$context))
+            {
+                unset($result->$k);
+            }
+        }
+
+        $fields = self::$customfields;
+
+        if($this->params->get('load_object', 0) == 1)
+        {
+            include_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
+            $article->minicck = MiniCCKHTML::getInstance($fields);
+            $article->minicck->set('data', $result);
         }
         else
         {
-            $article->text = $article->text.$html;
-        }
+            $layout = $this->getLauout($content_type);
+            $position = $isCategory ? $this->params->get('position_cat', 'top') : $this->params->get('position_content', 'top');
 
+            if($this->params->get('load_css', '1') == 1){
+                $doc = JFactory::getDocument();
+                $doc->addStyleSheet(JURI::base(true).'/plugins/system/minicck/minicck/minicck.css');
+            }
+
+            ob_start();
+            require JPATH_ROOT.'/plugins/system/minicck/tmpl/'.$layout;
+            $html = ob_get_clean();
+
+            if($position == 'top')
+            {
+                $article->text = $html.$article->text;
+            }
+            else
+            {
+                $article->text = $article->text.$html;
+            }
+        }
     }
 
     static function getCustomFields()
@@ -416,7 +454,7 @@ HTML;
 
     private function setContentTypes()
     {
-        $params = json_decode($this->config['params']);
+        $params = $this->config['params'];
         $types = $params->content_types;
         if(!is_array($types) || count($types) == 0)
         {
@@ -433,7 +471,7 @@ HTML;
 
     private function setCustomFields()
     {
-        $customfields = json_decode($this->config['params']);
+        $customfields = $this->config['params'];
         $customfields = $customfields->customfields;
         if(!is_array($customfields) || count($customfields) == 0){
             return;
@@ -477,16 +515,28 @@ HTML;
 
     private function getLauout($contentType)
     {
-        $layout = $this->params->get('layout', 'default.php');
+        $isCategory = ($this->context == 'com_content.category');
+
+        $layout = ($isCategory) ? $this->params->get('layout', 'default_cat.php') : $this->params->get('layout', 'default.php');
 
         if(!self::$contentTypes)
         {
             $this->setContentTypes();
         }
 
-        if(!empty(self::$contentTypes[$contentType]->tmpl))
+        if($isCategory)
         {
-            $layout = self::$contentTypes[$contentType]->tmpl;
+            if(!empty(self::$contentTypes[$contentType]->category_tmpl))
+            {
+                $layout = self::$contentTypes[$contentType]->category_tmpl;
+            }
+        }
+        else
+        {
+            if(!empty(self::$contentTypes[$contentType]->content_tmpl))
+            {
+                $layout = self::$contentTypes[$contentType]->content_tmpl;
+            }
         }
 
         return $layout;

@@ -78,19 +78,22 @@ HTML;
         $name = JText::_("PLG_MINICCK_TYPE_CONTENT_NAME");
         $title = JText::_("PLG_MINICCK_TYPE_CONTENT_TITLE");
         $del = JText::_('PLG_MINICCK_DEL_TYPE_CONTENT');
-        $tpl = JText::_('PLG_MINICCK_TYPE_CONTENT_TPL');
+        $tplContent = JText::_('PLG_MINICCK_TYPE_CONTENT_TPL');
+        $tplCat = JText::_('PLG_MINICCK_TYPE_CATEGORY_TPL');
 
         $tname  = (!empty($type->name))  ? $type->name  : 'content_type_'.$id;
         $ttitle = (!empty($type->title)) ? $type->title : '';
         $readonly = (is_null($type)) ? '' : ' readonly="readonly"';
         $options = $this->gerTplOptions();
-        $selected = (!empty($type->tmpl)) ? $type->tmpl : '';
-        $tplSelect = JHTML::_('select.genericlist', $options, 'jform[params][content_types]['.$id.'][tmpl]', 'class="content_type_tmpl inputbox"', 'value', 'text', $selected);
+        $selectedContent = (!empty($type->content_tmpl)) ? $type->content_tmpl : '';
+        $selectedCat = (!empty($type->category_tmpl)) ? $type->category_tmpl : '';
+        $tplContentSelect = JHTML::_('select.genericlist', $options, 'jform[params][content_types]['.$id.'][content_tmpl]', 'class="content_type_tmpl inputbox"', 'value', 'text', $selectedContent);
+        $tplCatSelect = JHTML::_('select.genericlist', $options, 'jform[params][content_types]['.$id.'][category_tmpl]', 'class="category_type_tmpl inputbox"', 'value', 'text', $selectedCat);
 
         $html = <<<HTML
         <div id="content_type_$id" class="content_type_contayner">
         <hr style="clear:both"/>
-        <div class="control-group">
+        <div class="control-group" style="width: 50%; float: left;">
         	<div class="control-label">
                 <label>$name</label>
         	</div>
@@ -107,7 +110,13 @@ HTML;
                     />
         	</div>
         </div>
-        <div class="control-group">
+        <div class="control-group" style="width: 50%; float: left;">
+        	<div class="control-label">
+                <label>$tplContent</label>
+        	</div>
+        	<div class="controls">$tplContentSelect</div>
+        </div>
+        <div class="control-group" style="width: 50%; float: left;">
         	<div class="control-label">
                 <label>$title</label>
         	</div>
@@ -122,21 +131,27 @@ HTML;
                     />
         	</div>
         </div>
-        <div class="control-group">
+        <div class="control-group" style="width: 50%; float: left;">
         	<div class="control-label">
-                <label>$tpl</label>
+                <label>$tplCat</label>
         	</div>
-        	<div class="controls">$tplSelect</div>
+        	<div class="controls">$tplCatSelect</div>
         </div>
+        <div style="clear: both;"></div>
 HTML;
         if(count($this->fields))
-        {
+        {   $i = 0;
             foreach($this->fields as $field)
             {
+                $i++;
                 $html .= $this->loadField($id, $type, $field);
+                if($i % 2 == 0){
+                    $html .= '<hr style="clear: both"/>';
+                }
             }
         }
         $html .= <<<HTML
+        <hr style="clear: both"/>
         <input
             type="button"
             class="btn btn-danger del-button"
@@ -151,21 +166,36 @@ HTML;
     function loadField($typeId, $type, $field)
     {
         $fieldName = $field->name;
-        $checked = (isset($type->fields->$fieldName)) ? ' checked="checked"' : '';
+        $checkedCat = (!empty($type->fields->$fieldName->category)) ? ' checked="checked"' : '';
+        $checkedContent = (!empty($type->fields->$fieldName->content)) ? ' checked="checked"' : '';
+        $cat = JText::_('PLG_MINICCK_CAT');
+        $content = JText::_('PLG_MINICCK_CONTENT');
         $html = <<<HTML
-        <div class="control-group">
+        <div class="control-group" style="width: 50%; float: left;">
         	<div class="control-label">
-                <label>{$field->title}</label>
+                <label style="font-weight: bold;">{$field->title}</label>
         	</div>
         	<div class="controls">
+        	<label for="$fieldName-category" style="float: left;">$cat
                 <input
                     type="checkbox"
-                    name="jform[params][content_types][$typeId][fields][$fieldName]"
+                    id="$fieldName-category"
+                    name="jform[params][content_types][$typeId][fields][$fieldName][category]"
                     value="1"
                     class="field_name inputbox"
                     aria-invalid="false"
-                    $checked
-                    />
+                    $checkedCat
+                    /></label>
+        	<label for="$fieldName-content" style="float: left;">$content
+                <input
+                    type="checkbox"
+                    id="$fieldName-content"
+                    name="jform[params][content_types][$typeId][fields][$fieldName][content]"
+                    value="1"
+                    class="field_name inputbox"
+                    aria-invalid="false"
+                    $checkedContent
+                    /></label>
         	</div>
         </div>
 HTML;
