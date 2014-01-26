@@ -12,9 +12,9 @@ class MiniCCKHTML
     private static $customfields;
 
 
-    public function getFieldValue($fname)
+    public function getFieldValue($articleId, $fname)
     {
-        $data = $this->data->$fname;
+        $data = !empty($this->data->$articleId->$fname) ? $this->data->$articleId->$fname : '';
         $result = $this->getValue($fname,$data);
         $result= empty($result) ? '' : $result;
         return $result;
@@ -26,14 +26,14 @@ class MiniCCKHTML
         return $result;
     }
 
-    public function get($property)
+    public function get($articleId)
     {
-        return $this->$property;
+        return isset($this->data->$articleId) ? $this->data->$articleId : null;
     }
 
-    public function set($property, $value=null)
+    public function set($articleId, $value=null)
     {
-        $this->$property = $value;
+        $this->data->$articleId = $value;
     }
 
     public static function getCustomField($name)

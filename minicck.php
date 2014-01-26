@@ -360,8 +360,22 @@ HTML;
     {
         $config = $this->config["params"];
 
-        if(($context != 'com_content.article' && $context != 'com_content.category')
-            || ($context == 'com_content.article' && !$config->allow_in_content)
+        if($context != 'com_content.article' && $context != 'com_content.category')
+        {
+            return;
+        }
+
+        if($this->params->get('load_object', 0) == 1)
+        {
+            if(!self::$customfields)
+            {
+                $this->setCustomFields();
+            }
+            include_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
+            $article->minicck = MiniCCKHTML::getInstance(self::$customfields);
+        }
+
+        if(($context == 'com_content.article' && !$config->allow_in_content)
             || ($context == 'com_content.category' && !$config->allow_in_category)
         ){
             return;
@@ -381,14 +395,16 @@ HTML;
 
         if(!is_object($result) || !count($result)) return;
 
-        $this->context = $context;
-        $isCategory = ($this->context == 'com_content.category');
-        $context = $isCategory ? 'category' : 'content';
-
         if(!self::$customfields)
         {
             $this->setCustomFields();
         }
+
+        $fields = self::$customfields;
+
+        $this->context = $context;
+        $isCategory = ($this->context == 'com_content.category');
+        $context = $isCategory ? 'category' : 'content';
 
         if(!self::$contentTypes)
         {
@@ -409,13 +425,9 @@ HTML;
             }
         }
 
-        $fields = self::$customfields;
-
         if($this->params->get('load_object', 0) == 1)
         {
-            include_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
-            $article->minicck = MiniCCKHTML::getInstance($fields);
-            $article->minicck->set('data', $result);
+            $article->minicck->set($article->id, $result);
         }
         else
         {
