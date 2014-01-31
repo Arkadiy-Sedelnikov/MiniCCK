@@ -71,14 +71,17 @@ class plgSystemMinicck extends JPlugin
             try
             {
                 $cleanedData = array();
+                $i = 0;
                 foreach($data as $k => $v)
                 {
                     $field = self::getCustomField($k);
 
+
                     $className = $this->loadElement($field);
                     if($className != false && method_exists($className,'cleanValue'))
                     {
-                        $cleanedData[$k] = $className::cleanValue($field, $v);
+                        $cleanedData[$i]['field'] = $k;
+                        $cleanedData[$i]['field_values'] = $className::cleanValue($field, $v);
                     }
                     else
                     {
@@ -86,35 +89,47 @@ class plgSystemMinicck extends JPlugin
                         {
                             foreach($v as $val)
                             {
-                                $cleanedData[$k][] = htmlspecialchars(strip_tags($val));
+                                $cleanedData[$i]['field'] = $k;
+                                $cleanedData[$i]['field_values'] = htmlspecialchars(strip_tags($val));
+                                $i++;
                             }
                         }
                         else
                         {
-                            $cleanedData[$k] = htmlspecialchars(strip_tags($v));
+                            $cleanedData[$i]['field'] = $k;
+                            $cleanedData[$i]['field_values'] = htmlspecialchars(strip_tags($v));
                         }
                     }
+                    $i++;
                 }
 
-                $data = json_encode($cleanedData);
                 $db = JFactory::getDbo();
 
                 $query = $db->getQuery(true);
                 $query->delete('#__minicck');
                 $query->where('content_id = ' . $db->Quote($articleId));
                 $db->setQuery($query);
-                if (!$db->query())
+                if (!$db->execute())
                 {
                     throw new Exception($db->getErrorMsg());
                 }
 
                 $query->clear();
                 $query->insert('#__minicck');
-                $query->columns(array($db->quoteName('content_id'), $db->quoteName('field_values')));
-                $query->values($articleId.', '.$db->quote($data));
+                $query->columns(array(
+                    $db->quoteName('content_id'),
+                    $db->quoteName('field'),
+                    $db->quoteName('field_values')
+                ));
+
+                foreach($cleanedData as $v)
+                {
+                    $query->values($db->quote($articleId) . ',' . $db->quote($v['field']) . ',' . $db->quote($v['field_values']));
+                }
+
                 $db->setQuery($query);
 
-                if (!$db->query())
+                if (!$db->execute())
                 {
                     throw new Exception($db->getErrorMsg());
                 }
@@ -162,19 +177,28 @@ class plgSystemMinicck extends JPlugin
         {
             $db = JFactory::getDbo();
             $query = $db->getQuery(true);
-            $query->select('field_values');
+            $query->select('`field`, `field_values`');
             $query->from('#__minicck');
             $query->where('content_id = ' . $db->Quote($articleId));
             $db->setQuery($query);
-            $results = $db->loadResult();
+            $results = $db->loadObjectList();
 
             if ($db->getErrorNum())
             {
-                $this->_subject->setError($db->getErrorMsg()); return false;
+                $this->_subject->setError($db->getErrorMsg());
+                return false;
             }
         }
 
-        $dataMinicck = (!empty($results)) ? json_decode($results, true) : array();
+        $dataMinicck = array();
+
+        if(!empty($results) && is_array($results) && count($results))
+        {
+            foreach($results as $v)
+            {
+                $dataMinicck[$v->field][] = $v->field_values;
+            }
+        }
 
         $options = $this->gerContentTypeOptions();
         if(!$options)
@@ -183,7 +207,7 @@ class plgSystemMinicck extends JPlugin
             return true;
         }
 
-        $contentType = (!empty($dataMinicck['content_type'])) ? $dataMinicck['content_type'] : '';
+        $contentType = (!empty($dataMinicck['content_type'][0])) ? $dataMinicck['content_type'][0] : '';
         if($contentType == '')
         {
             $contentTypeFields = new stdClass();
@@ -229,10 +253,10 @@ HTML;
         {
             foreach(self::$customfields as $customfield)
             {
-                if(!is_file(JPATH_ROOT.'/plugins/system/minicck/elements/'.$customfield['type'].'.php'))
+                if(!is_file(JPATH_ROOT.'/plugins/system/minicck/fields/'.$customfield['type'].'.php'))
                     continue;
 
-                include_once(JPATH_ROOT.'/plugins/system/minicck/elements/'.$customfield['type'].'.php');
+                include_once(JPATH_ROOT.'/plugins/system/minicck/fields/'.$customfield['type'].'.php');
 
                 $className = 'JFormField'.ucfirst($customfield['type']);
 
@@ -335,7 +359,7 @@ HTML;
                 $query->where('content_id = ' . $db->Quote($articleId));
                 $db->setQuery($query);
 
-                if (!$db->query())
+                if (!$db->execute())
                 {
                     throw new Exception($db->getErrorMsg());
                 }
@@ -365,7 +389,9 @@ HTML;
             return;
         }
 
-        if($this->params->get('load_object', 0) == 1)
+        $loadObject = $this->params->get('load_object', 0);
+
+        if($loadObject == 1)
         {
             if(!self::$customfields)
             {
@@ -383,17 +409,25 @@ HTML;
 
         $db = JFactory::getDbo();
         $q = $db->getQuery(true);
-        $q->select('field_values')
+        $q->select('`field`, `field_values`')
             ->from('#__minicck')
             ->where('content_id = '.(int)$article->id);
-        $db->setQuery($q, 0, 1);
-        $result = $db->loadResult();
+        $db->setQuery($q);
+        $result = $db->loadObjectList();
 
-        if(empty($result)) return;
+        if(!empty($results) && is_array($results) && count($results)) return;
 
-        $result = json_decode($result);
+        $dataMinicck = array();
 
-        if(!is_object($result) || !count($result)) return;
+        foreach($result as $v)
+        {
+            $dataMinicck[$v->field][] = $v->field_values;
+        }
+
+        $result = $dataMinicck;
+        unset($dataMinicck);
+
+        if(!is_array($result) || !count($result)) return;
 
         if(!self::$customfields)
         {
@@ -411,21 +445,27 @@ HTML;
             $this->setContentTypes();
         }
 
-        $content_type = $result->content_type;
+        $content_type = (!empty($result['content_type'][0])) ? $result['content_type'][0] : '';
+
+        if(!$content_type)
+        {
+            return;
+        }
 
         $typeFields = self::$contentTypes[$content_type]->fields;
 
-        unset($result->content_type);
+        unset($result['content_type']);
 
+        //убираем лишние в категории или контенте поля
         foreach($result as $k => $v)
         {
             if(!isset($typeFields->$k->$context))
             {
-                unset($result->$k);
+                unset($result[$k]);
             }
         }
 
-        if($this->params->get('load_object', 0) == 1)
+        if($loadObject == 1)
         {
             $article->minicck->set($article->id, $result);
         }
@@ -575,9 +615,9 @@ HTML;
      */
     private function loadElement($field)
     {
-        if(!is_file(JPATH_ROOT.'/plugins/system/minicck/elements/'.$field['type'].'.php'))
+        if(!is_file(JPATH_ROOT.'/plugins/system/minicck/fields/'.$field['type'].'.php'))
             return false;
-        include_once(JPATH_ROOT.'/plugins/system/minicck/elements/'.$field['type'].'.php');
+        include_once(JPATH_ROOT.'/plugins/system/minicck/fields/'.$field['type'].'.php');
 
         $className = 'JFormField'.ucfirst($field['type']);
         return $className;
