@@ -42,7 +42,7 @@ class plgSystemMinicck extends JPlugin
         if($this->isAdmin || ($option == 'com_content' && $view == 'form' && $layout == 'edit'))
         {
             $document = JFactory::getDocument();
-            $document->addScript('/plugins/system/minicck/assets/js/minicck_jq.js');
+            $document->addScript(JUri::root().'plugins/system/minicck/assets/js/minicck_jq.js');
         }
     }
 
