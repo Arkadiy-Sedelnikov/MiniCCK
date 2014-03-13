@@ -139,6 +139,10 @@ function contentTypeDel(id)
 function checkEnter(element)
 {
     var el = jQuery(element);
+
+    if(el.attr('readonly') == 'readonly')
+        return;
+
     var value = el.val();
     value = translit(value);
     el.val(value);
@@ -176,7 +180,7 @@ function translit(value)
 
 function trim(string)
 {
-    string = string.replace(/'|"|<|>|\!|\||@|#|$|%|^|\^|\$|\\|\/|&|\*|\(\)|-|\|\/|;|\+|№|,|\?|_|:|{|}|\[|\]/g, "");
+    string = string.replace(/'|"|<|>|\!|\||@|#|$|%|^|\^|\$|\\|\/|&|\*|\(\)|\|\/|;|\+|№|,|\?|:|{|}|\[|\]/g, "");
     string = string.replace(/(^\s+)|(\s+$)/g, "");
     return string;
 }
