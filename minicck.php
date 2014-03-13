@@ -446,8 +446,19 @@ HTML;
                 $doc->addStyleSheet(JURI::base(true).'/plugins/system/minicck/minicck/minicck.css');
             }
 
+            //переопределение шаблона
+            $template = JFactory::getApplication()->getTemplate();
+
+            $tmpl = JPATH_ROOT. '/templates/'.$template.'/html/plg_system_minicck/'.$layout;
+
+            if(!JFile::exists($tmpl))
+            {
+                $tmpl = JPATH_ROOT.'/plugins/system/minicck/tmpl/'.$layout;
+            }
+
+            //подключение шаблона
             ob_start();
-            require JPATH_ROOT.'/plugins/system/minicck/tmpl/'.$layout;
+                require $tmpl;
             $html = ob_get_clean();
 
             if($position == 'top')
