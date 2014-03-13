@@ -179,7 +179,14 @@ class plgSystemMinicck extends JPlugin
         $options = $this->gerContentTypeOptions();
         if(!$options)
         {
-            echo JText::_('PLG_MINICCK_NO_TYPES_CREATED');
+            echo '
+            <div class="tab-pane" id="minicck">
+                <div class="control-group" id="minicck_content_type_contayner">
+                    '.JText::_('PLG_MINICCK_NO_TYPES_CREATED').'
+                </div>
+                <hr style="clear:both"/>
+            </div>
+            ';
             return true;
         }
 
