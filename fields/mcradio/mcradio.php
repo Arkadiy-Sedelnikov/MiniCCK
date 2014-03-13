@@ -6,8 +6,9 @@
  */
 
 defined('_JEXEC') or die;
+require_once JPATH_ROOT . '/plugins/system/minicck/classes/fields.class.php';
 
-class JFormFieldMcradio
+class JFormFieldMcradio extends MiniCCKFields
 {
     var $attributes = null;
     var $value = null;
@@ -51,7 +52,9 @@ class JFormFieldMcradio
         return $html;
     }
 
-    static function  getValue($field, $value){
-        return $field['params'][$value];
+    static function  getValue($field, $value)
+    {
+        $return = self::loadTemplate('mcradio', $field['params'][$value]);
+        return $return;
     }
 }

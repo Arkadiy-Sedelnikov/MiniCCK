@@ -6,8 +6,9 @@
  */
 
 defined('_JEXEC') or die;
+require_once JPATH_ROOT . '/plugins/system/minicck/classes/fields.class.php';
 
-class JFormFieldMctext
+class JFormFieldMctext extends MiniCCKFields
 {
     var $attributes = null;
     var $value = null;
@@ -48,7 +49,7 @@ class JFormFieldMctext
     }
 
     static function  getValue($field, $value){
-        $return = $value;
+        $return = self::loadTemplate('mctext', $value);
         return $return;
     }
 }

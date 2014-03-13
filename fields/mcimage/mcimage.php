@@ -6,8 +6,9 @@
  */
 
 defined('_JEXEC') or die;
+require_once JPATH_ROOT . '/plugins/system/minicck/classes/fields.class.php';
 
-class JFormFieldMcimage
+class JFormFieldMcimage extends MiniCCKFields
 {
     var $attributes = null;
     var $value = null;
@@ -90,7 +91,9 @@ class JFormFieldMcimage
     static function  getValue($field, $value){
         if(substr($value, 0, 1) !== '/')
             $value = '/'.$value;
-        $return = '<img src="'.$value.'"/>';
+
+        $return = self::loadTemplate('mcimage', $value);
+
         return $return;
     }
 }

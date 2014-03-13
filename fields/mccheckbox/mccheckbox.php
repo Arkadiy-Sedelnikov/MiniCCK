@@ -6,8 +6,9 @@
  */
 
 defined('_JEXEC') or die;
+require_once JPATH_ROOT . '/plugins/system/minicck/classes/fields.class.php';
 
-class JFormFieldMccheckbox
+class JFormFieldMccheckbox extends MiniCCKFields
 {
     var $attributes = null;
     var $value = null;
@@ -57,20 +58,24 @@ class JFormFieldMccheckbox
         return $html;
     }
 
-    static function  getValue($field, $value){
+    static function  getValue($field, $value)
+    {
         if(is_array($value) && count($value)>0){
             $tmp = array();
             foreach($value as $v){
                 $tmp[] = $field['params'][$v];
             }
-            $return = implode(' | ', $tmp);
+            $data = $tmp;
         }
         else if(!is_array($value) && !empty($value)){
-            $return = (!empty($field['params'][$value])) ? $field['params'][$value] : $value;
+            $data = (!empty($field['params'][$value])) ? array($field['params'][$value]) : array($value);
         }
         else{
-            $return = $value;
+            $data = array($value);
         }
+
+        $return = self::loadTemplate('mccheckbox', $data);
+
         return $return;
     }
 }
