@@ -7,7 +7,7 @@
 
 defined('_JEXEC') or die;
 
-class JFormFieldMcselect
+class JFormFieldMctext
 {
     var $attributes = null;
     var $value = null;
@@ -15,7 +15,7 @@ class JFormFieldMcselect
 
     function __construct($name, $attributes, $value){
         $this->attributes = $attributes;
-        $this->value = $value[0];
+        $this->value = $value;
         $this->name = $name;
     }
 
@@ -31,27 +31,19 @@ class JFormFieldMcselect
 
 
         $field = plgSystemMinicck::getCustomField($name);
-
-
-        $options = array();
-        if(is_array($field["params"]) && count($field["params"])>0){
-            foreach($field["params"] as $key => $val){
-                $options[] = JHtml::_('select.option', $key,     JText::_($val));
-            }
-        }
-
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
         $html = '<div class="control-group '.$name.'"'.$hidden.'>';
         $html .= '<label for="'.$id.'" class="control-label" title="" >'.$label.'</label>';
         $html .= '<div class="controls">';
-        $html .= JHTML::_('select.genericlist', $options, $fieldname, 'id="'.$id.'"'.$disabled.' class="type inputbox '.$name.'"', 'value', 'text', $value);
+        $html .= '<input type="text" id="'.$id.'" name="'.$fieldname.'" value="'.$value.'" class="inputbox '.$name.'"'.$disabled.'>';
         $html .= '</div>';
         $html .= '</div>';
         return $html;
     }
 
     static function  getValue($field, $value){
-        return $field['params'][$value[0]];
+        $return = $value;
+        return $return;
     }
 }

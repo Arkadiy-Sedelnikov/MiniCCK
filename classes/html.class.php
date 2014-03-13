@@ -14,9 +14,8 @@ class MiniCCKHTML
 
     public function getFieldValue($articleId, $fname)
     {
-        $data = $this->data->$articleId;
-        $data = !empty($data[$fname]) ? $data[$fname] : '';
-        $result = $this->getValue($fname, $data);
+        $data = !empty($this->data->$articleId->$fname) ? $this->data->$articleId->$fname : '';
+        $result = $this->getValue($fname,$data);
         $result= empty($result) ? '' : $result;
         return $result;
     }
@@ -65,7 +64,6 @@ class MiniCCKHTML
     private function getValue($fname, $value)
     {
         $field = self::getCustomField($fname);
-
         $className = $this->loadElement($field);
 
         if($className != false && method_exists($className,'getValue'))
@@ -84,9 +82,9 @@ class MiniCCKHTML
      */
     private function loadElement($field)
     {
-        if(!is_file(JPATH_ROOT.'/plugins/system/minicck/fields/'.$field['type'].'.php'))
+        if(!is_file(JPATH_ROOT.'/plugins/system/minicck/elements/'.$field['type'].'.php'))
             return false;
-        include_once(JPATH_ROOT.'/plugins/system/minicck/fields/'.$field['type'].'.php');
+        include_once(JPATH_ROOT.'/plugins/system/minicck/elements/'.$field['type'].'.php');
 
         $className = 'JFormField'.ucfirst($field['type']);
         return $className;

@@ -15,7 +15,7 @@ class JFormFieldMcimage
 
     function __construct($name, $attributes, $value){
         $this->attributes = $attributes;
-        $this->value = $value[0];
+        $this->value = $value;
         $this->name = $name;
     }
 
@@ -84,7 +84,7 @@ class JFormFieldMcimage
 
     static function  getValue($field, $value){
         if(substr($value, 0, 1) !== '/')
-            $value = '/'.$value[0];
+            $value = '/'.$value;
         $return = '<img src="'.$value.'"/>';
         return $return;
     }

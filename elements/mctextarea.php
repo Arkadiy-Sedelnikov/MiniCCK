@@ -7,7 +7,7 @@
 
 defined('_JEXEC') or die;
 
-class JFormFieldMctext
+class JFormFieldMctextarea
 {
     var $attributes = null;
     var $value = null;
@@ -15,7 +15,7 @@ class JFormFieldMctext
 
     function __construct($name, $attributes, $value){
         $this->attributes = $attributes;
-        $this->value = $value[0];
+        $this->value = $value;
         $this->name = $name;
     }
 
@@ -27,7 +27,7 @@ class JFormFieldMctext
         $type = $this->attributes['type'];
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
-        $value = $this->value;
+        $value = htmlspecialchars_decode($this->value);
 
 
         $field = plgSystemMinicck::getCustomField($name);
@@ -36,14 +36,19 @@ class JFormFieldMctext
         $html = '<div class="control-group '.$name.'"'.$hidden.'>';
         $html .= '<label for="'.$id.'" class="control-label" title="" >'.$label.'</label>';
         $html .= '<div class="controls">';
-        $html .= '<input type="text" id="'.$id.'" name="'.$fieldname.'" value="'.$value.'" class="inputbox '.$name.'"'.$disabled.'>';
+        $html .= '<textarea id="'.$id.'" name="'.$fieldname.'" cols="20" rows="5" class="inputbox '.$name.'"'.$disabled.'>'.$value.'</textarea>';
         $html .= '</div>';
         $html .= '</div>';
         return $html;
     }
 
     static function  getValue($field, $value){
-        $return = $value[0];
+        $return = htmlspecialchars_decode($value);
+        return $return;
+    }
+
+    static function  cleanValue($field, $value){
+        $return = htmlspecialchars($value);
         return $return;
     }
 }

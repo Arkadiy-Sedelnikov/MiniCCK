@@ -7,14 +7,13 @@
 	<license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
 	<authorEmail>a.sedelnikov@gmail.com</authorEmail>
 	<authorUrl>http://argens.ru</authorUrl>
-	<version>1.4</version>
+	<version>1.3</version>
 	<description>PLG_MINICCK_XML_DESCRIPTION</description>
 
 	<files>
 		<folder>assets</folder>
 		<folder>classes</folder>
         <folder>elements</folder>
-        <folder>fields</folder>
 		<folder>minicck</folder>
         <folder>sql</folder>
         <folder>tmpl</folder>
@@ -34,27 +33,11 @@
 			<file charset="utf8" driver="mysql">sql/install.sql</file>
 		</sql>
 	</install>
-
 	<uninstall>
 		<sql>
 			<file charset="utf8" driver="mysql">sql/uninstall.sql</file>
 		</sql>
 	</uninstall>
-
-    <update>
-        <schemas>
-            <schemapath type="mysql">sql/updates/mysql</schemapath>
-        </schemas>
-    </update>
-
-    <scriptfile>script.php</scriptfile>
-
-    <updateservers>
-        <server
-                type="extension"
-                priority="1"
-                name="MiniCCK Updates"><![CDATA[http://argens.ru/index.php?option=com_ars&view=update&task=stream&format=xml&id=2&dummy=extension.xml]]></server>
-    </updateservers>
 
 	<config>
 		<fields name="params" addfieldpath="/plugins/system/minicck/elements">
@@ -156,4 +139,10 @@
 			</fieldset>
 		</fields>
 	</config>
+    <updateservers>
+        <server
+            type="extension"
+            priority="1"
+            name="MiniCCK Updates"><![CDATA[http://argens.ru/index.php?option=com_ars&view=update&task=stream&format=xml&id=2&dummy=extension.xml]]></server>
+    </updateservers>
 </extension>
