@@ -12,11 +12,17 @@ class JFormFieldMccheckbox
     var $attributes = null;
     var $value = null;
     var $name = null;
+    var $title = null;
 
     function __construct($name, $attributes, $value){
         $this->attributes = $attributes;
         $this->value = $value;
         $this->name = $name;
+    }
+
+    static function getTitle()
+    {
+        return JText::_('PLG_MINICCK_CHECKBOX');
     }
 
     function getInput()

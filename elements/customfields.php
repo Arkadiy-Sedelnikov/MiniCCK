@@ -9,6 +9,8 @@ defined('_JEXEC') or die;
 
 jimport('joomla.html.html');
 jimport('joomla.form.formfield');
+jimport('joomla.filesystem.folder');
+require_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
 
 class JFormFieldCustomfields extends JFormField
 {
@@ -19,18 +21,24 @@ class JFormFieldCustomfields extends JFormField
         JHtml::_('behavior.framework');
         $doc = JFactory::getDocument();
         $doc->addScript(JUri::root() . 'plugins/system/minicck/assets/js/minicck_jq.js');
-
+        $htmlClass = new MiniCCKHTML(0,'');
         $numFields = 1;
+
         $plugin = JPluginHelper::getPlugin('system', 'minicck');
         $pluginParams = (!empty($plugin->params)) ? json_decode($plugin->params) : new stdClass();
-        $typeOptions = array(
-            JHtml::_('select.option', 'mcselect', JText::_('PLG_MINICCK_SELECT')),
-            JHtml::_('select.option', 'mcradio', JText::_('PLG_MINICCK_RADIO')),
-            JHtml::_('select.option', 'mccheckbox', JText::_('PLG_MINICCK_CHECKBOX')),
-            JHtml::_('select.option', 'mctext', JText::_('PLG_MINICCK_TEXT')),
-            JHtml::_('select.option', 'mctextarea', JText::_('PLG_MINICCK_TEXTAREA')),
-            JHtml::_('select.option', 'mcimage', JText::_('PLG_MINICCK_IMAGE')),
-        );
+        $typeOptions = array();
+
+        $fields = JFolder::folders(JPATH_ROOT . '/plugins/system/minicck/fields');
+
+        foreach($fields as $field)
+        {
+            $className = $htmlClass->loadElement(array('type' => $field));
+            if(!$className)
+            {
+                continue;
+            }
+            $typeOptions[] = JHtml::_('select.option', $field, $className::getTitle());
+        }
 
         $fadd = JText::_('PLG_MINICCK_ADD_FIELD');
         $fname = JText::_("PLG_MINICCK_FIELD_NAME");

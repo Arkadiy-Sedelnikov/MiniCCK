@@ -19,6 +19,11 @@ class JFormFieldMcimage
         $this->name = $name;
     }
 
+    static function getTitle()
+    {
+        return JText::_('PLG_MINICCK_IMAGE');
+    }
+
     function getInput()
     {
 

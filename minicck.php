@@ -236,12 +236,12 @@ HTML;
         {
             foreach(self::$customfields as $customfield)
             {
-                if(!is_file(JPATH_ROOT.'/plugins/system/minicck/elements/'.$customfield['type'].'.php'))
+                $className = $this->loadElement($customfield);
+
+                if(!$className)
+                {
                     continue;
-
-                include_once(JPATH_ROOT.'/plugins/system/minicck/elements/'.$customfield['type'].'.php');
-
-                $className = 'JFormField'.ucfirst($customfield['type']);
+                }
 
                 $attributes = array();
                 $attributes['name'] = $customfield['name'];
@@ -593,11 +593,17 @@ HTML;
      */
     private function loadElement($field)
     {
-        if(!is_file(JPATH_ROOT.'/plugins/system/minicck/elements/'.$field['type'].'.php'))
-            return false;
-        include_once(JPATH_ROOT.'/plugins/system/minicck/elements/'.$field['type'].'.php');
+        $name = $field['type'];
+        $file = JPATH_ROOT.'/plugins/system/minicck/fields/'.$name.'/'.$name.'.php';
 
-        $className = 'JFormField'.ucfirst($field['type']);
+        if(!JFile::exists($file))
+        {
+            return false;
+        }
+
+        include_once($file);
+
+        $className = 'JFormField'.ucfirst($name);
         return $className;
     }
 
