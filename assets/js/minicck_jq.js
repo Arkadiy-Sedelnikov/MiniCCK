@@ -211,3 +211,12 @@ function reloadMinicckFields(element){
         jQuery('textarea', cont).removeAttr('disabled');
     }
 }
+
+function loadExtraFields(field)
+{
+    if(!fieldsExtraOptions[field])
+        return;
+
+    var extraFields = fieldsExtraOptions[field];
+    var asdf = 1;
+}

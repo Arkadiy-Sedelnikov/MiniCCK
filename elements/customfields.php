@@ -24,12 +24,15 @@ class JFormFieldCustomfields extends JFormField
         $htmlClass = new MiniCCKHTML(0,'');
         $numFields = 1;
 
+
         $plugin = JPluginHelper::getPlugin('system', 'minicck');
         $pluginParams = (!empty($plugin->params)) ? json_decode($plugin->params) : new stdClass();
-        $typeOptions = array();
+        $typeOptions = array(JHtml::_('select.option', '', JText::_('JSELECT')));
 
         $fields = JFolder::folders(JPATH_ROOT . '/plugins/system/minicck/fields');
 
+        $script = "\nvar fieldsExtraOptions = {\n";
+        $scriptArr = array();
         foreach($fields as $field)
         {
             $className = $htmlClass->loadElement(array('type' => $field));
@@ -38,7 +41,18 @@ class JFormFieldCustomfields extends JFormField
                 continue;
             }
             $typeOptions[] = JHtml::_('select.option', $field, $className::getTitle());
+
+            if(method_exists($className, 'addToScriptExtraOptions'))
+            {
+
+            $scriptArr[] = "$field: [".$className::addToScriptExtraOptions()."]";
+            }
         }
+
+        $script .= implode(', ', $scriptArr);
+        $script .= "};\n";
+
+        $doc->addScriptDeclaration($script);
 
         $fadd = JText::_('PLG_MINICCK_ADD_FIELD');
         $fname = JText::_("PLG_MINICCK_FIELD_NAME");
@@ -55,7 +69,7 @@ HTML;
 
         if (empty($pluginParams->customfields))
         {
-            $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][0][type]', 'class="type inputbox"', 'value', 'text');
+            $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][0][type]', 'class="type inputbox" onchange="loadExtraFields(this.value)"', 'value', 'text');
 
             $html .= <<<HTML
 <div id="field_0" class="field_contayner">
@@ -100,7 +114,7 @@ HTML;
             $k = 0;
             foreach ($pluginParams->customfields as $custom)
             {
-                $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][' . $k . '][type]', 'class="type inputbox"', 'value', 'text', $custom->type);
+                $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][' . $k . '][type]', 'class="type inputbox" onchange="loadExtraFields(this.value)"', 'value', 'text', $custom->type);
                 $html .= <<<HTML
 <div id="field_$k" class="field_contayner">
 <hr style="clear:both"/>

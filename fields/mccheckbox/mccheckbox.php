@@ -78,4 +78,33 @@ class JFormFieldMccheckbox extends MiniCCKFields
 
         return $return;
     }
+
+    /** Добавляем дополнительные инпуты  в настройки полей
+     * @return string
+     */
+    static function addToScriptExtraOptions()
+    {
+        return "
+            {
+                title: 'title',
+                name: 'mccheckbox',
+                type: 'textarea',
+                value: 'qwe',
+                attr:{
+                    onclick: 'function()',
+                    class: 'textarea'
+                }
+            },
+            {
+                title: 'title2',
+                name: 'heckbox',
+                type: 'text',
+                value: 'qweqq',
+                attr:{
+                    onclick: 'function()',
+                    class: 'textarea'
+                }
+            }
+        ";
+    }
 }
