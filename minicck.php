@@ -367,8 +367,10 @@ HTML;
     {
         $config = $this->config["params"];
 
-        if($context != 'com_content.article' && $context != 'com_content.category')
-        {
+        if(($context != 'com_content.article' && $context != 'com_content.category')
+            || ($context == 'com_content.category' && !$config->allow_in_category)
+            || ($context == 'com_content.article' && !$config->allow_in_content)
+        ){
             return;
         }
 
@@ -380,12 +382,6 @@ HTML;
             }
             include_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
             $article->minicck = MiniCCKHTML::getInstance(self::$customfields);
-        }
-
-        if(($context == 'com_content.article' && !$config->allow_in_content)
-            || ($context == 'com_content.category' && !$config->allow_in_category)
-        ){
-            return;
         }
 
         $db = JFactory::getDbo();
@@ -443,7 +439,7 @@ HTML;
 
             if($this->params->get('load_css', '1') == 1){
                 $doc = JFactory::getDocument();
-                $doc->addStyleSheet(JURI::base(true).'/plugins/system/minicck/minicck/minicck.css');
+                $doc->addStyleSheet(JURI::base(true).'/plugins/system/minicck/assets/css/minicck.css');
             }
 
             //переопределение шаблона
