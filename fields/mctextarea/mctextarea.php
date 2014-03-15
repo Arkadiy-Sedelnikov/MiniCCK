@@ -49,12 +49,12 @@ class JFormFieldMctextarea extends MiniCCKFields
     }
 
     static function  getValue($field, $value){
-        $return = htmlspecialchars_decode($value);
+        $return = self::loadTemplate('mctext', htmlspecialchars_decode($value));
         return $return;
     }
 
     static function  cleanValue($field, $value){
-        $return = self::loadTemplate('mctextarea', htmlspecialchars($value));
+        $return = htmlspecialchars($value);
         return $return;
     }
 }
