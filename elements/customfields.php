@@ -31,8 +31,9 @@ class JFormFieldCustomfields extends JFormField
 
         $fields = JFolder::folders(JPATH_ROOT . '/plugins/system/minicck/fields');
 
-        $script = "\nvar fieldsExtraOptions = {\n";
-        $scriptArr = array();
+
+
+        $scriptArr = $extraOptionsSettings = array();
         foreach($fields as $field)
         {
             $className = $htmlClass->loadElement(array('type' => $field));
@@ -42,14 +43,15 @@ class JFormFieldCustomfields extends JFormField
             }
             $typeOptions[] = JHtml::_('select.option', $field, $className::getTitle());
 
-            if(method_exists($className, 'addToScriptExtraOptions'))
+            if(method_exists($className, 'extraOptions'))
             {
-
-            $scriptArr[] = "$field: [".$className::addToScriptExtraOptions()."]";
+                $scriptArr[] = "$field: [".$className::extraOptions(true)."]";
+                $extraOptionsSettings[$field] = $className::extraOptions(false);
             }
         }
 
-        $script .= implode(', ', $scriptArr);
+        $script = "\nvar fieldsExtraOptions = {\n";
+        $script .= implode(', ', $scriptArr)."\n";
         $script .= "};\n";
 
         $doc->addScriptDeclaration($script);
@@ -69,11 +71,12 @@ HTML;
 
         if (empty($pluginParams->customfields))
         {
-            $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][0][type]', 'class="type inputbox" onchange="loadExtraFields(this.value)"', 'value', 'text');
+            $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][0][type]', 'class="type inputbox" onchange="loadExtraFields(this.value, 0)"', 'value', 'text');
 
             $html .= <<<HTML
 <div id="field_0" class="field_contayner">
 <hr style="clear:both"/>
+<div style="width: 50%; float: left">
 <div class="control-group">
 	<div class="control-label">
         <label for="jform_params_name_0">$fname</label>
@@ -104,6 +107,9 @@ HTML;
         <textarea name="jform[params][customfields][0][params]" id="jform_params_params_0" cols="40" rows="5" class="params inputbox"></textarea>
 	</div>
 </div>
+</div>
+<div style="width: 50%; float: left" id="extra_params_0" class="extra_params"></div>
+<div style="clear: both;"></div>
 <input type="button" class="btn btn-danger del-button" value="$fdel" onclick="fieldDel(\'field_0\')">
 </div>
 HTML;
@@ -114,10 +120,63 @@ HTML;
             $k = 0;
             foreach ($pluginParams->customfields as $custom)
             {
-                $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][' . $k . '][type]', 'class="type inputbox" onchange="loadExtraFields(this.value)"', 'value', 'text', $custom->type);
+                $extraparams = '';
+
+                if(!empty($extraOptionsSettings[$custom->type])){
+
+                    foreach($extraOptionsSettings[$custom->type] as $extraparam)
+                    {
+                        $value = !empty($custom->extraparams->$extraparam['name']) ? $custom->extraparams->$extraparam['name'] : '';
+
+                        $attr = '';
+                        if(isset($extraparam['attr']) && is_array($extraparam['attr']) && count($extraparam['attr']))
+                        {
+                            foreach($extraparam['attr'] as $key => $val)
+                            {
+                                $attr .= $key.'="'.$val.'" ';
+                            }
+                        }
+
+
+                        if($extraparam['type'] == 'textarea')
+                        {
+                            $input = '<textarea name="jform[params][customfields]['.$k.'][extraparams]['.$extraparam['name'].']" '.$attr.'>'.$value.'</textarea>';
+                        }
+                        else if($extraparam['type'] == 'select')
+                        {
+                            $options = array();
+                            if(isset($extraparam['options']) && is_array($extraparam['options']) && count($extraparam['options']))
+                            {
+                                foreach($extraparam['options'] as $key => $val)
+                                {
+                                    $options[] = JHtml::_('select.option', $key, $val);
+                                }
+                            }
+
+                            $input = JHTML::_('select.genericlist', $options, 'jform[params][customfields][' . $k . '][extraparams]['.$extraparam['name'].']', $attr, 'value', 'text', $value);
+                        }
+                        else
+                        {
+                            $input = '<input type="'.$extraparam['type'].'" name="jform[params][customfields]['.$k.'][extraparams]['.$extraparam['name'].']" value="'.$value.'" '.$attr.'/>';
+                        }
+                        $extraparams .= <<<HTML
+                        <div class="control-group">
+                        	<div class="control-label">
+                                <label>{$extraparam['title']}</label>
+                        	</div>
+                        	<div class="controls">
+                                $input
+                        	</div>
+                        </div>
+HTML;
+                    }
+                }
+
+                $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][' . $k . '][type]', 'class="type inputbox" onchange="loadExtraFields(this.value, '.$k.')"', 'value', 'text', $custom->type);
                 $html .= <<<HTML
 <div id="field_$k" class="field_contayner">
 <hr style="clear:both"/>
+<div style="width: 50%; float: left">
 <div class="control-group">
 	<div class="control-label">
         <label>$fname</label>
@@ -148,6 +207,9 @@ HTML;
         <textarea name="jform[params][customfields][$k][params]" cols="40" rows="5" class="params inputbox">{$custom->params}</textarea>
 	</div>
 </div>
+</div>
+<div style="width: 50%; float: left" id="extra_params_$k" class="extra_params">$extraparams</div>
+<div style="clear: both;"></div>
 <input type="button" class="btn btn-danger del-button" value="$fdel" onclick="fieldDel('field_$k')">
 </div>
 HTML;

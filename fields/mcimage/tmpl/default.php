@@ -6,6 +6,11 @@
  */
 
 defined('_JEXEC') or die;
+
+$attr = '';
+$attr .= (!empty($data['extraparams']->heigth)) ? ' height="'.$data['extraparams']->heigth.'"' : '';
+$attr .= (!empty($data['extraparams']->width)) ? ' width="'.$data['extraparams']->width.'"' : '';
+$attr .= (!empty($data['extraparams']->border)) ? ' border="'.$data['extraparams']->border.'"' : '';
 ?>
 
-<img src="<?php echo $data; ?>"/>
+<img src="<?php echo $data['value']; ?>"<?php echo $attr; ?>/>

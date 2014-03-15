@@ -88,12 +88,59 @@ class JFormFieldMcimage extends MiniCCKFields
         return $html;
     }
 
-    static function  getValue($field, $value){
-        if(substr($value, 0, 1) !== '/')
+    static function  getValue($field, $value)
+    {
+        if(!empty($value) && substr($value, 0, 1) !== '/')
+        {
             $value = '/'.$value;
+        }
+        else{
+            $value = '';
+        }
 
-        $return = self::loadTemplate('mcimage', $value);
-
+        $return = self::loadTemplate('mcimage', array('value' => $value, 'extraparams' => $field['extraparams']));
         return $return;
+    }
+
+    /** Добавляем дополнительные параметры в настройки полей
+     * @return string
+     */
+    static function extraOptions($json = false)
+    {
+        $extraOptions = array(
+            array(
+                'title' => 'Высота',
+                'name' => 'heigth',
+                'type' => 'text',
+                'value' => '',
+                'attr' => array(
+                    'class' => 'inputbox'
+                )
+            ),
+            array(
+                'title' => 'Ширина',
+                'name' => 'width',
+                'type' => 'text',
+                'value' => '',
+                'attr' => array(
+                    'class' => 'inputbox'
+                )
+            ),
+            array(
+                'title' => 'Бордюр',
+                'name' => 'border',
+                'type' => 'select',
+                'options' => array(
+                    '0' => '0px',
+                    '1' => '1px',
+                    '2' => '2px'
+                ),
+                'attr' => array(
+                    'class' => 'inputbox'
+                )
+            )
+        );
+
+        return $json ? json_encode($extraOptions) : $extraOptions;
     }
 }

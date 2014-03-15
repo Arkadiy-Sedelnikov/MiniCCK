@@ -7,6 +7,8 @@
 
 defined('_JEXEC') or die;
 
+jimport('joomla.filesystem.file');
+
 class plgSystemMinicck extends JPlugin
 {
     private static $customfields = null;
@@ -367,10 +369,18 @@ HTML;
     {
         $config = $this->config["params"];
 
-        if(($context != 'com_content.article' && $context != 'com_content.category')
+        if(($context != 'com_content.article' && $context != 'com_content.category' && $context != 'com_tags.tag')
             || ($context == 'com_content.category' && !$config->allow_in_category)
+            || ($context == 'com_tags.tag' && !$config->allow_in_category)
             || ($context == 'com_content.article' && !$config->allow_in_content)
         ){
+            return;
+        }
+
+        $isTags = ($context == 'com_tags.tag') ? true : false;
+
+        if($isTags && $article->type_alias != 'com_content.article')
+        {
             return;
         }
 
@@ -384,11 +394,14 @@ HTML;
             $article->minicck = MiniCCKHTML::getInstance(self::$customfields);
         }
 
+        $articleId = $isTags ? $article->content_item_id : $article->id;
+        $body = $isTags ? 'core_body' : 'text';
+
         $db = JFactory::getDbo();
         $q = $db->getQuery(true);
         $q->select('field_values')
             ->from('#__minicck')
-            ->where('content_id = '.(int)$article->id);
+            ->where('content_id = '.(int)$articleId);
         $db->setQuery($q, 0, 1);
         $result = $db->loadResult();
 
@@ -430,7 +443,7 @@ HTML;
 
         if($this->params->get('load_object', 0) == 1)
         {
-            $article->minicck->set($article->id, $result);
+            $article->minicck->set($articleId, $result);
         }
         else
         {
@@ -459,11 +472,11 @@ HTML;
 
             if($position == 'top')
             {
-                $article->text = $html.$article->text;
+                $article->$body = $html.$article->$body;
             }
             else
             {
-                $article->text = $article->text.$html;
+                $article->$body = $article->$body.$html;
             }
         }
     }
@@ -510,6 +523,7 @@ HTML;
             $newFields[$k]['name'] = $customfield->name;
             $newFields[$k]['title'] = $customfield->title;
             $newFields[$k]['type'] = $customfield->type;
+            $newFields[$k]['extraparams'] = !empty($customfield->extraparams) ? $customfield->extraparams : null;
 
             if(in_array($customfield->type, array('mcselect', 'mcradio', 'mccheckbox')))
             {

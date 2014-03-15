@@ -21,7 +21,13 @@ function fieldAdd(){
 
     jQuery('select.type', newField)
         .attr('name', 'jform[params][customfields]['+numFields+'][type]')
+        .attr('onchange', 'loadExtraFields(this.value, '+numFields+')')
+        .prop('selectedIndex',0)
         .show();
+
+    jQuery('.extra_params', newField)
+        .attr('id', 'extra_params_'+numFields)
+        .text('');
 
 
     jQuery('textarea.params', newField)
@@ -212,11 +218,56 @@ function reloadMinicckFields(element){
     }
 }
 
-function loadExtraFields(field)
+function loadExtraFields(field, id)
 {
-    if(!fieldsExtraOptions[field])
+    if(!fieldsExtraOptions[field]){
+        jQuery('#extra_params_'+id).text('');
         return;
+    }
 
-    var extraFields = fieldsExtraOptions[field];
-    var asdf = 1;
+    var extraFields = fieldsExtraOptions[field][0];
+
+    for(var i = 0; i < extraFields.length; i++)
+    {
+        var element;
+        var parent;
+
+        if(extraFields[i].type == 'textarea')
+        {
+            element = jQuery('<textarea/>');
+            element.html(extraFields[i].value);
+            element.attr('aria-invalid', false);
+        }
+        else if(extraFields[i].type == 'select')
+        {
+            element = jQuery('<select/>');
+            var selectValues = extraFields[i].options;
+            jQuery.each(selectValues, function(key, value) {
+                element.append(jQuery('<option>', {value : key}).text(value));
+            });
+        }
+        else
+        {
+            element = jQuery('<input/>');
+            element.attr('value', extraFields[i].value);
+        }
+
+        element.attr('name', 'jform[params][customfields]['+id+'][extraparams]['+extraFields[i].name+']');
+
+        for(var k in extraFields[i].attr)
+        {
+            element.attr(k, extraFields[i].attr[k]);
+        }
+
+        parent = jQuery('<div class="control-group">' +
+                           '<div class="control-label">' +
+                               '<label>'+extraFields[i].title+'</label>' +
+                           '</div>' +
+                           '<div class="controls">' +
+                           '</div>' +
+                        '</div>');
+
+        jQuery('.controls', parent).append(element);
+        jQuery('#extra_params_'+id).append(parent);
+    }
 }
