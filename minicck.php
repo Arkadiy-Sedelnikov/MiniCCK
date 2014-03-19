@@ -193,7 +193,8 @@ class plgSystemMinicck extends JPlugin
         }
 
         $contentType = (!empty($dataMinicck['content_type'])) ? $dataMinicck['content_type'] : '';
-        if($contentType == '')
+        
+        if($contentType == '' || empty(self::$contentTypes[$contentType]))
         {
             $contentTypeFields = new stdClass();
         }
@@ -428,6 +429,11 @@ HTML;
         }
 
         $content_type = $result->content_type;
+
+        if(empty(self::$contentTypes[$content_type]))
+        {
+            return;
+        }
 
         $typeFields = self::$contentTypes[$content_type]->fields;
 
