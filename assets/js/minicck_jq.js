@@ -220,8 +220,10 @@ function reloadMinicckFields(element){
 
 function loadExtraFields(field, id)
 {
+    var extraParamsDiv = jQuery('#extra_params_'+id);
+    extraParamsDiv.text('');
+
     if(!fieldsExtraOptions[field]){
-        jQuery('#extra_params_'+id).text('');
         return;
     }
 
@@ -267,7 +269,8 @@ function loadExtraFields(field, id)
                            '</div>' +
                         '</div>');
 
+
         jQuery('.controls', parent).append(element);
-        jQuery('#extra_params_'+id).append(parent);
+        extraParamsDiv.append(parent);
     }
 }

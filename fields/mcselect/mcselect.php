@@ -59,7 +59,13 @@ class JFormFieldMcselect extends MiniCCKFields
 
     static function  getValue($field, $value)
     {
-        $return = self::loadTemplate('mcselect', $field['params'][$value]);
+        $return = '';
+
+        if(!empty($field['params'][$value]))
+        {
+            $return = self::loadTemplate('mcselect', $field['params'][$value]);
+        }
+
         return $return;
     }
 }

@@ -70,6 +70,11 @@ class plgSystemMinicck extends JPlugin
 
         if ($articleId && $data)
         {
+            if(!self::$customfields)
+            {
+                $this->setCustomFields();
+            }
+
             try
             {
                 $cleanedData = array();
@@ -78,6 +83,7 @@ class plgSystemMinicck extends JPlugin
                     $field = self::getCustomField($k);
 
                     $className = $this->loadElement($field);
+
                     if($className != false && method_exists($className,'cleanValue'))
                     {
                         $cleanedData[$k] = $className::cleanValue($field, $v);
@@ -86,9 +92,9 @@ class plgSystemMinicck extends JPlugin
                     {
                         if(is_array($v) && count($v)>0)
                         {
-                            foreach($v as $val)
+                            foreach($v as $key => $val)
                             {
-                                $cleanedData[$k][] = htmlspecialchars(strip_tags($val));
+                                $cleanedData[$k][$key] = htmlspecialchars(strip_tags($val));
                             }
                         }
                         else

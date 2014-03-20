@@ -28,27 +28,14 @@ class JFormFieldMinigallery extends MiniCCKFields
 
     function getInput()
     {
-        if(!defined('PLG_MINICCK_MCIMAGE_LOADED')){
-            define('PLG_MINICCK_MCIMAGE_LOADED', 1);
+        if(!defined('PLG_MINICCK_MINIGALLERY_LOADED')){
+            define('PLG_MINICCK_MINIGALLERY_LOADED', 1);
             JHtml::_('behavior.modal');
-            // Build the script.
-            $script = array();
-            $script[] = '	function jInsertFieldValue(value, id) {';
-            $script[] = '		var old_value = document.id(id).value;';
-            $script[] = '		if (old_value != value) {';
-            $script[] = '			var elem = document.id(id);';
-            $script[] = '			elem.value = value;';
-            $script[] = '			elem.fireEvent("change");';
-            $script[] = '			if (typeof(elem.onchange) === "function") {';
-            $script[] = '				elem.onchange();';
-            $script[] = '			}';
-            $script[] = '			jMediaRefreshPreview(id);';
-            $script[] = '		}';
-            $script[] = '	}';
-            JFactory::getDocument()->addScriptDeclaration(implode("\n", $script));
+            JHtml::_('behavior.framework');
+            JFactory::getDocument()->addScript(JUri::root().'plugins/system/minicck/fields/minigallery/assets/js/script.js');
         }
 
-
+        self::loadLang('minigallery');
 
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
@@ -56,7 +43,6 @@ class JFormFieldMinigallery extends MiniCCKFields
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
-
 
         $field = plgSystemMinicck::getCustomField($name);
         $directory = trim($field["params"]);
@@ -67,21 +53,44 @@ class JFormFieldMinigallery extends MiniCCKFields
 
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
-        $html = '<div class="control-group '.$name.'"'.$hidden.'>';
-        $html .= '<label for="'.$id.'" class="control-label" title="" >'.$label.'</label>';
-        $html .= '<div class="controls">';
-        $html .= '<input type="text" id="'.$id.'" name="'.$fieldname.'" value="'.$value.'" class="input-small '.$name.'"'.$disabled.'>';
-        $html .= '<a class="modal btn" title="' . JText::_('JLIB_FORM_BUTTON_SELECT') . '" href="'
-            //  index.php?option=com_media&view=images&tmpl=component&asset=com_content&author=&fieldid=jform_images_image_intro&folder=
-            .  'index.php?option=com_media&amp;view=images&amp;tmpl=component&amp;asset=com_content&amp;author=&amp;fieldid=' . $id . '&amp;folder=' . $directory . '"'
-            . ' rel="{handler: \'iframe\', size: {x: 800, y: 500}}">';
-        $html .= JText::_('JLIB_FORM_BUTTON_SELECT') . '</a><a class="btn hasTooltip" title="' . JText::_('JLIB_FORM_BUTTON_CLEAR') . '" href="#" onclick="';
-        $html .= 'jInsertFieldValue(\'\', \'' . $id . '\');';
-        $html .= 'return false;';
-        $html .= '">';
-        $html .= '<i class="icon-remove"></i></a>';
-        $html .= '</div>';
-        $html .= '</div>';
+        $html = '
+            <div class="control-group '.$name.'"'.$hidden.'>
+                <label for="'.$id.'_image" class="control-label" title="" >'.$label.'</label>
+                <div class="controls">
+                <a class="btn btn-small btn-success del_button"
+                    style="margin-bottom: 5px"
+                    href="#"
+                    onclick="minigalleryADDField(this, \''.$id.'\', \''.$fieldname.'\', \''.$name.'\', \''.$directory.'\');
+                    return false;">
+                    '.JText::_('PLG_MINICCK_MINIGALLERY_ADD_FIELD').'
+                </a>
+            ';
+        if(count($value)>0)
+        {
+            foreach($value as $k => $v){
+
+
+
+                $html .= '
+                <div class="minicck_minigallery" style="margin-bottom: 5px">
+                    <input type="text" placeholder="image" id="'.$id.'_'.$k.'_image" name="'.$fieldname.'['.$k.'][image]" value="'.$v['image'].'" class="input-big '.$name.'"'.$disabled.'/>
+                    <a class="modal btn" title="' . JText::_('JLIB_FORM_BUTTON_SELECT') . '" href="'
+                    .  'index.php?option=com_media&amp;view=images&amp;tmpl=component&amp;asset=com_content&amp;author=&amp;fieldid=' . $id.'_'.$k . '_image&amp;folder=' . $directory . '"'
+                    . ' rel="{handler: \'iframe\', size: {x: 800, y: 600}}">'
+                    . JText::_('JLIB_FORM_BUTTON_SELECT') . '
+                    </a>
+                    <a class="btn hasTooltip" title="Delete"
+                        href="#" onclick="minigalleryDeleteField(this); return false;">
+                        <i class="icon-remove"></i>
+                    </a>
+                    <input type="text" placeholder="alt" id="'.$id.'_'.$k.'_alt" name="'.$fieldname.'['.$k.'][alt]" value="'.$v['alt'].'" class="input-big '.$name.'"'.$disabled.'/>
+                </div>
+                ';
+            }
+        }
+         $html .= '
+                </div>
+            </div>';
         return $html;
     }
 
@@ -95,8 +104,23 @@ class JFormFieldMinigallery extends MiniCCKFields
             $value = '';
         }
 
-        $return = self::loadTemplate('mcimage', array('value' => $value, 'extraparams' => $field['extraparams']));
+        $return = self::loadTemplate('minigallery', array('value' => $value, 'extraparams' => $field['extraparams']));
         return $return;
+    }
+
+    static function  cleanValue($field, $value){
+
+        if(count($value)>0)
+        {
+            foreach($value as $k => $v)
+            {
+                $v['image'] = strip_tags($v['image']);
+                $v['alt'] = strip_tags($v['alt']);
+                $value[$k] = $v;
+            }
+        }
+
+        return $value;
     }
 
     /** Добавляем дополнительные параметры в настройки полей
@@ -106,7 +130,7 @@ class JFormFieldMinigallery extends MiniCCKFields
     {
         $extraOptions = array(
             array(
-                'title' => 'Heigth',
+                'title' => JText::_('PLG_MINICCK_MINIGALLERY_HEIGTH'),
                 'name' => 'heigth',
                 'type' => 'text',
                 'value' => '',
@@ -115,7 +139,7 @@ class JFormFieldMinigallery extends MiniCCKFields
                 )
             ),
             array(
-                'title' => 'Width',
+                'title' => JText::_('PLG_MINICCK_MINIGALLERY_WIDTH'),
                 'name' => 'width',
                 'type' => 'text',
                 'value' => '',
@@ -124,31 +148,31 @@ class JFormFieldMinigallery extends MiniCCKFields
                 )
             ),
             array(
-                'title' => 'Autoplay',
+                'title' => JText::_('PLG_MINICCK_MINIGALLERY_AUTOPLAY'),
                 'name' => 'autoplay',
                 'type' => 'select',
                 'options' => array(
-                    '0' => 'No',
-                    '1' => 'Yes'
+                    '1' => JText::_('JYES'),
+                    '0' => JText::_('JNO')
                 ),
                 'attr' => array(
                     'class' => 'inputbox'
                 )
             ),
             array(
-                'title' => 'Crop Images',
+                'title' => JText::_('PLG_MINICCK_MINIGALLERY_CROP'),
                 'name' => 'crop',
                 'type' => 'select',
                 'options' => array(
-                    '1' => 'Yes',
-                    '0' => 'No'
+                    '1' => JText::_('JYES'),
+                    '0' => JText::_('JNO')
                 ),
                 'attr' => array(
                     'class' => 'inputbox'
                 )
             ),
             array(
-                'title' => 'Delay autoplay',
+                'title' => JText::_('PLG_MINICCK_MINIGALLERY_DELAY'),
                 'name' => 'delay',
                 'type' => 'text',
                 'value' => '3',
@@ -158,16 +182,16 @@ class JFormFieldMinigallery extends MiniCCKFields
             )
         ,
             array(
-                'title' => 'Max Zoom',
+                'title' => JText::_('PLG_MINICCK_MINIGALLERY_MAX_ZOOM'),
                 'name' => 'maxZoom',
                 'type' => 'select',
                 'value' => '1.5',
                 'options' => array(
-                    '1' => '1',
+                    '1.0' => '1',
                     '1.5' => '1.5',
-                    '2' => '2',
+                    '2.0' => '2',
                     '2.5' => '2.5',
-                    '3' => '3',
+                    '3.0' => '3',
                 ),
                 'attr' => array(
                     'class' => 'inputbox'
