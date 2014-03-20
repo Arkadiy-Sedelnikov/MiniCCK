@@ -96,17 +96,100 @@ class JFormFieldMinigallery extends MiniCCKFields
 
     static function  getValue($field, $value)
     {
-        if(!empty($value) && substr($value, 0, 1) !== '/')
+        if(!is_array($value) || !count($value))
         {
-            $value = '/'.$value;
+            return '';
         }
-        else{
-            $value = '';
-        }
+        $params = $field['extraparams'];
+        $autoplay = (!empty($params->autoplay)) ? 'true' : 'false';
+        $crop = (!empty($params->crop)) ? 'true' : 'false';
 
-        $return = self::loadTemplate('minigallery', array('value' => $value, 'extraparams' => $field['extraparams']));
+        $tn3GalleryWidth = (!empty($params->width)) ? $params->width : 620;
+        $tn3GalleryHeight = (!empty($params->heigth)) ? $params->heigth : 425;
+        $tn3ImageHeight = $tn3GalleryHeight - 47;
+
+        $css = "
+        .tn3-gallery {
+            position: relative;
+            width: {$tn3GalleryWidth}px;
+            height: {$tn3GalleryHeight}px;
+            background-color: #000000;
+            line-height: normal;
+        }
+        .tn3-image {
+            position: absolute;
+            width: {$tn3GalleryWidth}px;
+            height: {$tn3ImageHeight}px;
+            background-color: #000000;
+        }
+        .tn3-controls-bg {
+            position: absolute;
+            width: {$tn3GalleryWidth}px;
+            height: 47px;
+            bottom: 0px;
+            background-image: url('/plugins/system/minicck/fields/minigallery/assets/skins/tn3/tbg.png');
+        }
+        ";
+
+        $script = <<<SCRIPT
+        jQuery(document).ready(function ($) {
+            //Thumbnailer.config.shaderOpacity = 1;
+            var tn1 = $('.mygallery').tn3({
+                skinDir: "/plugins/system/minicck/fields/minigallery/assets/skins",
+                imageClick: "fullscreen",
+                responsive:"width",
+                autoplay: $autoplay,
+                delay:{$params->delay}000,
+                image: {
+                    maxZoom: {$params->maxZoom},
+                    crop: $crop,
+                    clickEvent: "dblclick",
+                    transitions: [
+                        {
+                            type: "blinds",
+                            duration:300
+                        },
+                        {
+                            type: "grid",
+                            duration: 460,
+                            easing: "easeInQuad",
+                            gridX: 1,
+                            gridY: 8,
+                            // flat, diagonal, circle, random
+                            sort: "random",
+                            sortReverse: false,
+                            diagonalStart: "bl",
+                            // fade, scale
+                            method: "scale",
+                            partDuration: 360,
+                            partEasing: "easeOutSine",
+                            partDirection: "left"
+                        }
+                    ]
+                }
+            });
+        });
+SCRIPT;
+
+
+        JHtml::_('behavior.framework');
+        $doc = JFactory::getDocument();
+        $doc->addStyleSheet(JUri::root().'plugins/system/minicck/fields/minigallery/assets/skins/tn3/tn3.css');
+        $doc->addScript(JUri::root().'plugins/system/minicck/fields/minigallery/assets/js/jquery.tn3lite.min.js');
+        $doc->addScriptDeclaration($script);
+        $doc->addStyleDeclaration($css);
+
+
+//        for($i=0; $i<count($value); $i++)
+//        {
+//            $value[$i]->image = (!empty($value[$i]->image) && substr($value[$i]->image, 0, 1) !== '/')
+//                ? '/'.$value[$i]->image : '';
+//        }
+
+        $return = self::loadTemplate('minigallery', array('value' => $value, 'extraparams' => $params));
         return $return;
     }
+
 
     static function  cleanValue($field, $value){
 
