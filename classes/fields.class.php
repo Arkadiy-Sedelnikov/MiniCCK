@@ -26,4 +26,17 @@ class MiniCCKFields
 
         return $html;
     }
+
+    static function loadLang($fieldName, $path='')
+    {
+        $lang = JFactory::getLanguage();
+
+        if(empty($path))
+        {
+            $path = JPATH_ROOT.'/plugins/system/minicck/fields/'.$fieldName.'/lang/';
+        }
+        $filename = 'plg_minicck_field_'.$fieldName;
+
+        $lang->load($filename, $path);
+    }
 }
