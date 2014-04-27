@@ -104,8 +104,8 @@ class JFormFieldMinigallery extends MiniCCKFields
         $autoplay = (!empty($params->autoplay)) ? 'true' : 'false';
         $crop = (!empty($params->crop)) ? 'true' : 'false';
 
-        $tn3GalleryWidth = (!empty($params->width)) ? $params->width : 620;
-        $tn3GalleryHeight = (!empty($params->heigth)) ? $params->heigth : 425;
+        $tn3GalleryWidth = $params->width = (!empty($params->width)) ? $params->width : 620;
+        $tn3GalleryHeight = $params->heigth = (!empty($params->heigth)) ? $params->heigth : 425;
         $tn3ImageHeight = $tn3GalleryHeight - 47;
 
         $css = "

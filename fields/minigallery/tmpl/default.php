@@ -7,7 +7,7 @@
 
 defined('_JEXEC') or die;
 ?>
-<div class="mygallery">
+<div class="mygallery" style="width: <?php echo $data['extraparams']->width; ?>; height: <?php echo $data['extraparams']->heigth; ?>;">
     <div class="tn3 album">
         <ol>
             <?php foreach($data['value'] as $v) : ?>
