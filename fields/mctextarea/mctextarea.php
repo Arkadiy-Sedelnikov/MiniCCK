@@ -13,6 +13,7 @@ class JFormFieldMctextarea extends MiniCCKFields
     var $attributes = null;
     var $value = null;
     var $name = null;
+    static $columnType = 'text';
 
     function __construct($name, $attributes, $value){
         $this->attributes = $attributes;

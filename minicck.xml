@@ -2,12 +2,12 @@
 <extension version="2.5" type="plugin" group="system" method="upgrade">
 	<name>PLG_MINICCK</name>
 	<author>Arkadiy Sedelnikov</author>
-	<creationDate>14.03.2014</creationDate>
+	<creationDate>30.04.2014</creationDate>
 	<copyright>(C) 2013 Arkadiy Sedelnikov. All rights reserved.</copyright>
 	<license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
 	<authorEmail>a.sedelnikov@gmail.com</authorEmail>
 	<authorUrl>http://argens.ru</authorUrl>
-	<version>1.4</version>
+	<version>2.0</version>
 	<description>PLG_MINICCK_XML_DESCRIPTION</description>
 
 	<files>
@@ -38,6 +38,14 @@
 			<file charset="utf8" driver="mysql">sql/uninstall.sql</file>
 		</sql>
 	</uninstall>
+
+    <update>
+        <schemas>
+            <schemapath type="mysql">sql/updates/mysql</schemapath>
+        </schemas>
+    </update>
+
+    <scriptfile>script.php</scriptfile>
 
 	<config>
 		<fields name="params" addfieldpath="/plugins/system/minicck/elements">
