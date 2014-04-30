@@ -1,0 +1,40 @@
+jquery.mb.gallery
+
+2.1.0 Minor bugfix:
+  if more than one in place gallery is on a page with different skin the previous opened gallery broken.
+
+2.0.8 Minor bugfix:
+  Added a demo for ajax galleries.
+  fix the image index from 0-based to 1-based (now calling startFrom:1 start from the first and not the second image)
+
+2.0.7 Minor bugfix:
+  managment of multiple gallery with thumbs.
+
+2.0.4 Minor bugfix:
+  if startFrom > gallery.images than startFrom = gallery.images.length-1.
+
+2.0.2 Minor bugfix:
+  Opera preload bugfix.
+
+2.0.1 Major issue:
+  fixed a terrible bug on IE that prevented it to load the CSS chosen on the fly by the script.
+
+2.0 Major issue:
+  Completly redrown the workflow, simplifyed thecode, better performance, easly intgratable with Flickr.
+  doesn't work in IE Quirks mode!! (no docType declaration).
+  Added EXIF metadata display.
+
+>> 1.5.5 issue:
+  a. add a target element where to show the gallery.
+  b. IE7 didn't show images at second call due to a bug introduced in 1.5.1 release (bug fixed).
+  c. IE7 problems on top positioning (bug fixed).
+
+1.5.2 issue:
+  Now descriptios can have images and links.
+
+1.5.1
+  Added a preload images for the toolbar;
+  removed the src attr from the images to speedup on load.
+
+1.5 Major issue:
+  Now you can have multiple galleries on the page that you can call from a link.

@@ -7,31 +7,21 @@
 
 defined('_JEXEC') or die;
 ?>
-<div class="mygallery" style="width: <?php echo $data['extraparams']->width; ?>; height: <?php echo $data['extraparams']->heigth; ?>;">
-    <div class="tn3 album">
-        <ol>
-            <?php foreach($data['value'] as $v) : ?>
-                <?php if(!empty($v->image)) : ?>
+<div
+    id="<?php echo $data['extraparams']->id; ?>_cont"
+    class="minicckGallery"
+    style="padding-top: 50px; width: <?php echo $data['extraparams']->width; ?>px; height: <?php echo $data['extraparams']->heigth; ?>px;"
+    ></div>
+<div id="<?php echo $data['extraparams']->id; ?>_gallery">
 
-                    <li>
-                        <?php if(!empty($v->alt)) : ?>
-                        <h4><?php echo $v->alt; ?></h4>
-                        <?php endif; ?>
-                        <a href="<?php echo JUri::root().$v->image; ?>">
-                            <img src="<?php echo JUri::root(); ?>plugins/system/minicck/fields/minigallery/classes/phpthumb/phpThumb.php?src=/<?php echo JUri::root(true).$v->image; ?>&w=35&h=35&zc=1"/>
-                        </a>
-                    </li>
+   <?php foreach($data['value'] as $v) : ?>
+       <?php if(!empty($v->image)) : ?>
 
-                <?php endif; ?>
-            <?php endforeach; ?>
-<!--            <li>-->
-<!--                <h4>Isolated sandy cove</h4>-->
-<!---->
-<!--                <div class="tn3 description">Zakynthos island, Greece</div>-->
-<!--                <a href="images/620x378/2.jpg">-->
-<!--                    <img src="images/35x35/2.jpg"/>-->
-<!--                </a>-->
-<!--            </li>-->
-        </ol>
-    </div>
+           <a class="imgThumb" href="<?php echo JUri::root(); ?>plugins/system/minicck/fields/minigallery/classes/phpthumb/phpThumb.php?src=/<?php echo JUri::root(true).$v->image; ?>&w=70&h=70&zc=1"></a>
+           <a class="imgFull" href="<?php echo JUri::root().$v->image; ?>"></a>
+           <div class="imgDesc"><?php if(!empty($v->alt)) echo $v->alt; ?></div>
+
+       <?php endif; ?>
+   <?php endforeach; ?>
+
 </div>

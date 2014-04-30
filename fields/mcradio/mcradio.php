@@ -13,6 +13,7 @@ class JFormFieldMcradio extends MiniCCKFields
     var $attributes = null;
     var $value = null;
     var $name = null;
+    static $columnType = 'varchar(250)';
 
     function __construct($name, $attributes, $value){
         $this->attributes = $attributes;

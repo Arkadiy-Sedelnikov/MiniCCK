@@ -13,7 +13,7 @@ class JFormFieldMccheckbox extends MiniCCKFields
     var $attributes = null;
     var $value = null;
     var $name = null;
-    var $title = null;
+    static $columnType = 'varchar(250)';
 
     function __construct($name, $attributes, $value){
         $this->attributes = $attributes;
@@ -33,7 +33,7 @@ class JFormFieldMccheckbox extends MiniCCKFields
         $type = $this->attributes['type'];
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
-        $value = $this->value;
+        $value = explode(',', $this->value);
         $field = plgSystemMinicck::getCustomField($name);
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
@@ -58,8 +58,9 @@ class JFormFieldMccheckbox extends MiniCCKFields
         return $html;
     }
 
-    static function  getValue($field, $value)
+    static function getValue($field, $value)
     {
+        $value = explode(',', $value);
         if(is_array($value) && count($value)>0){
             $tmp = array();
             foreach($value as $v){
