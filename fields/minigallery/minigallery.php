@@ -13,6 +13,7 @@ class JFormFieldMinigallery extends MiniCCKFields
     var $attributes = null;
     var $value = null;
     var $name = null;
+    static $columnType = 'text';
 
     function __construct($name, $attributes, $value){
         $this->attributes = $attributes;
@@ -42,7 +43,7 @@ class JFormFieldMinigallery extends MiniCCKFields
         $type = $this->attributes['type'];
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
-        $value = $this->value;
+        $value = json_decode($this->value, true);
 
         $field = plgSystemMinicck::getCustomField($name);
         $directory = trim($field["params"]);
@@ -94,97 +95,60 @@ class JFormFieldMinigallery extends MiniCCKFields
         return $html;
     }
 
+    /** Фронт
+     * @param $field
+     * @param $value
+     * @return string
+     */
     static function  getValue($field, $value)
     {
+        if(empty($value))
+        {
+            return '';
+        }
+
+        $value = json_decode($value);
+
         if(!is_array($value) || !count($value))
         {
             return '';
         }
+
         $params = $field['extraparams'];
+        $params->id = $field["name"];
         $autoplay = (!empty($params->autoplay)) ? 'true' : 'false';
-        $crop = (!empty($params->crop)) ? 'true' : 'false';
+        $raster = (!empty($params->raster)) ? 'true' : 'false';
 
-        $tn3GalleryWidth = $params->width = (!empty($params->width)) ? $params->width : 620;
-        $tn3GalleryHeight = $params->heigth = (!empty($params->heigth)) ? $params->heigth : 425;
-        $tn3ImageHeight = $tn3GalleryHeight - 47;
-
-        $css = "
-        .tn3-gallery {
-            position: relative;
-            width: {$tn3GalleryWidth}px;
-            height: {$tn3GalleryHeight}px;
-            background-color: #000000;
-            line-height: normal;
-        }
-        .tn3-image {
-            position: absolute;
-            width: {$tn3GalleryWidth}px;
-            height: {$tn3ImageHeight}px;
-            background-color: #000000;
-        }
-        .tn3-controls-bg {
-            position: absolute;
-            width: {$tn3GalleryWidth}px;
-            height: 47px;
-            bottom: 0px;
-            background-image: url('/plugins/system/minicck/fields/minigallery/assets/skins/tn3/tbg.png');
-        }
-        ";
+        $params->width = (!empty($params->width)) ? $params->width : 620;
+        $params->heigth = (!empty($params->heigth)) ? $params->heigth : 425;
+        $skin = (!empty($params->skin)) ? $params->skin : 'black';
+        $rootUri = JUri::root();
 
         $script = <<<SCRIPT
         jQuery(document).ready(function ($) {
-            //Thumbnailer.config.shaderOpacity = 1;
-            var tn1 = $('.mygallery').tn3({
-                skinDir: "/plugins/system/minicck/fields/minigallery/assets/skins",
-                imageClick: "fullscreen",
-                responsive:"width",
-                autoplay: $autoplay,
-                delay:{$params->delay}000,
-                image: {
-                    maxZoom: {$params->maxZoom},
-                    crop: $crop,
-                    clickEvent: "dblclick",
-                    transitions: [
-                        {
-                            type: "blinds",
-                            duration:300
-                        },
-                        {
-                            type: "grid",
-                            duration: 460,
-                            easing: "easeInQuad",
-                            gridX: 1,
-                            gridY: 8,
-                            // flat, diagonal, circle, random
-                            sort: "random",
-                            sortReverse: false,
-                            diagonalStart: "bl",
-                            // fade, scale
-                            method: "scale",
-                            partDuration: 360,
-                            partEasing: "easeOutSine",
-                            partDirection: "left"
-                        }
-                    ]
-                }
+            $('#{$params->id}_gallery').mbGallery({
+                galleryTitle:"{$field["title"]}",
+                maskBgnd:'#ccc',
+                overlayOpacity:.9,
+                containment:'{$params->id}_cont',
+                minWidth: 100,
+                minHeight: 100,
+                maxWidth: {$params->width},
+			    maxHeight: {$params->heigth},
+                cssURL:"{$rootUri}plugins/system/minicck/fields/minigallery/assets/css/",
+                skin:'$skin',
+                exifData:false,
+                addRaster:$raster,
+                slideTimer: {$params->delay}000,
+			    autoSlide: $autoplay,
             });
         });
 SCRIPT;
 
-
         JHtml::_('behavior.framework');
         $doc = JFactory::getDocument();
-        $doc->addStyleSheet(JUri::root().'plugins/system/minicck/fields/minigallery/assets/skins/tn3/tn3.css');
-        $doc->addScript(JUri::root().'plugins/system/minicck/fields/minigallery/assets/js/jquery.tn3lite.min.js');
+        $doc->addScript($rootUri.'plugins/system/minicck/fields/minigallery/assets/inc/mbGallery.js');
         $doc->addScriptDeclaration($script);
-        $doc->addStyleDeclaration($css);
-
-
-//        for($i=0; $i<count($value); $i++)
-//        {
-//            $value[$i]->image = (!empty($value[$i]->image) && substr($value[$i]->image, 0, 1) !== '/')
-//                ? '/'.$value[$i]->image : '';
-//        }
 
         $return = self::loadTemplate('minigallery', array('value' => $value, 'extraparams' => $params));
         return $return;
@@ -243,8 +207,8 @@ SCRIPT;
                 )
             ),
             array(
-                'title' => JText::_('PLG_MINICCK_MINIGALLERY_CROP'),
-                'name' => 'crop',
+                'title' => JText::_('PLG_MINICCK_MINIGALLERY_RASTER'),
+                'name' => 'raster',
                 'type' => 'select',
                 'options' => array(
                     '1' => JText::_('JYES'),
@@ -262,19 +226,15 @@ SCRIPT;
                 'attr' => array(
                     'class' => 'inputbox'
                 )
-            )
-        ,
+            ),
             array(
-                'title' => JText::_('PLG_MINICCK_MINIGALLERY_MAX_ZOOM'),
-                'name' => 'maxZoom',
+                'title' => JText::_('PLG_MINICCK_MINIGALLERY_SKIN'),
+                'name' => 'skin',
                 'type' => 'select',
-                'value' => '1.5',
+                'value' => 'black',
                 'options' => array(
-                    '1.0' => '1',
-                    '1.5' => '1.5',
-                    '2.0' => '2',
-                    '2.5' => '2.5',
-                    '3.0' => '3',
+                    'white' => 'White',
+                    'black' => 'Black',
                 ),
                 'attr' => array(
                     'class' => 'inputbox'
@@ -283,5 +243,10 @@ SCRIPT;
         );
 
         return $json ? json_encode($extraOptions) : $extraOptions;
+    }
+
+    public static function prepareToSaveValue($value)
+    {
+        return json_encode($value);
     }
 }
