@@ -1,16 +1,23 @@
 function fieldAdd(){
     var counter = jQuery('#numFields');
-    var numFields = parseInt(counter.val());
+    var numFields = 0;
+    var fieldName = 1;
 
-    while (jQuery('#field_'+numFields).length > 0) {
+    while (jQuery('#field_'+(numFields+1)).length > 0) {
         numFields ++;
     }
+
+    while (jQuery('#name_field_'+fieldName).length > 0) {
+        fieldName ++;
+    }
+
     var field 	 = jQuery('div.field_contayner:first');
     var newField = field.clone();
 
     jQuery('input.name', newField)
-        .val('field_'+(numFields+1))
+        .val('field_'+(fieldName))
         .attr('name', 'jform[params][customfields]['+numFields+'][name]')
+        .attr('id', 'name_field_'+fieldName)
         .removeAttr('readonly');
 
     jQuery('input.title', newField)

@@ -82,7 +82,7 @@ HTML;
         <label for="jform_params_name_0">$fname</label>
 	</div>
 	<div class="controls">
-        <input type="text" name="jform[params][customfields][0][name]" id="jform_params_name_0" value="field_1" size="20" class="name inputbox" aria-invalid="false">
+        <input type="text" id="name_field_1" name="jform[params][customfields][0][name]" id="jform_params_name_0" value="field_1" size="20" class="name inputbox" aria-invalid="false">
 	</div>
 </div>
 <div class="control-group">
@@ -182,7 +182,7 @@ HTML;
         <label>$fname</label>
 	</div>
 	<div class="controls">
-        <input type="text" name="jform[params][customfields][$k][name]" value="{$custom->name}" size="20" class="name inputbox" aria-invalid="false" readonly="readonly" onblur="checkEnter(this)"/>
+        <input type="text" id="name_{$custom->name}" name="jform[params][customfields][$k][name]" value="{$custom->name}" size="20" class="name inputbox" aria-invalid="false" readonly="readonly" onblur="checkEnter(this)"/>
 	</div>
 </div>
 <div class="control-group">
