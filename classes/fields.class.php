@@ -7,16 +7,16 @@
  */
 class MiniCCKFields
 {
-    public static function loadTemplate($fieldName, $data)
+    public static function loadTemplate($fieldName, $data, $type='default')
     {
         //переопределение шаблона поля
         $template = JFactory::getApplication()->getTemplate();
 
-        $tmpl = JPATH_ROOT. '/templates/'.$template.'/html/plg_system_minicck/fields/'.$fieldName.'/default.php';
+        $tmpl = JPATH_ROOT. '/templates/'.$template.'/html/plg_system_minicck/fields/'.$fieldName.'/'.$type.'.php';
 
         if(!JFile::exists($tmpl))
         {
-            $tmpl = JPATH_ROOT.'/plugins/system/minicck/fields/'.$fieldName.'/tmpl/default.php';
+            $tmpl = JPATH_ROOT.'/plugins/system/minicck/fields/'.$fieldName.'/tmpl/'.$type.'.php';
         }
 
         //подключение шаблона
@@ -37,5 +37,10 @@ class MiniCCKFields
         $filename = 'plg_minicck_field_'.$fieldName;
 
         JFactory::getLanguage()->load($filename, $path);
+    }
+
+    static function prepareParams($params)
+    {
+        return trim($params);
     }
 }

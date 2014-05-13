@@ -28,25 +28,19 @@ class JFormFieldMcselect extends MiniCCKFields
 
     function getInput()
     {
-
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
         $type = $this->attributes['type'];
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
-
-
         $field = plgSystemMinicck::getCustomField($name);
-
-
         $options = array();
         if(is_array($field["params"]) && count($field["params"])>0){
             foreach($field["params"] as $key => $val){
                 $options[] = JHtml::_('select.option', $key,     JText::_($val));
             }
         }
-
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
         $html = '<div class="control-group '.$name.'"'.$hidden.'>';
@@ -67,6 +61,33 @@ class JFormFieldMcselect extends MiniCCKFields
             $return = self::loadTemplate('mcselect', $field['params'][$value]);
         }
 
+        return $return;
+    }
+
+    static function prepareParams($params)
+    {
+        $data = array();
+        $tmpRows = explode("\n", $params);
+        if(count($tmpRows)>0)
+        {
+            foreach($tmpRows as $tmpRow)
+            {
+                $elements = explode("::", $tmpRow);
+                if(count($elements) > 1)
+                {
+                    $data[$elements[0]] = isset($elements[1]) ? trim($elements[1]) : '';
+                }
+            }
+        }
+        return $data;
+    }
+
+    static function getFilterInput($field)
+    {
+        $values = JFactory::getApplication()->getUserState('minicck.filter', array());
+        $field['params'] = self::prepareParams($field['params']);
+        $field['selectedValues'] = isset($values[$field['name']]) ? $values[$field['name']] : '';
+        $return = self::loadTemplate('mcselect', $field, 'filter');
         return $return;
     }
 }

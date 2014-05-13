@@ -555,25 +555,11 @@ HTML;
             $newFields[$k]['type'] = $customfield->type;
             $newFields[$k]['extraparams'] = !empty($customfield->extraparams) ? $customfield->extraparams : null;
 
-            if(in_array($customfield->type, array('mcselect', 'mcradio', 'mccheckbox')))
+            $className = $this->loadElement($newFields[$k]);
+
+            if($className != false && method_exists($className,'prepareParams'))
             {
-                $tmpRows = array();
-                if(!empty($customfield->params))
-                {
-                    $tmpRows = explode("\n", $customfield->params);
-                    if(count($tmpRows)>0)
-                    {
-                        $elements = array();
-                        foreach($tmpRows as $tmpRow)
-                        {
-                          $elements = explode("::", $tmpRow);
-                            if(count($elements) > 1)
-                            {
-                                $newFields[$k]['params'][$elements[0]] = trim($elements[1]);
-                            }
-                        }
-                    }
-                }
+                $newFields[$k]['params'] = $className::prepareParams($customfield->params);
             }
             else
             {

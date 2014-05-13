@@ -28,15 +28,12 @@ class JFormFieldMctext extends MiniCCKFields
 
     function getInput()
     {
-
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
         $type = $this->attributes['type'];
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
-
-
         $field = plgSystemMinicck::getCustomField($name);
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
@@ -51,6 +48,15 @@ class JFormFieldMctext extends MiniCCKFields
 
     static function  getValue($field, $value){
         $return = self::loadTemplate('mctext', $value);
+        return $return;
+    }
+
+    static function getFilterInput($field)
+    {
+        $values = JFactory::getApplication()->getUserState('minicck.filter', array());
+        $field['params'] = self::prepareParams($field['params']);
+        $field['selectedValues'] = isset($values[$field['name']]) ? $values[$field['name']] : '';
+        $return = self::loadTemplate('mctext', $field, 'filter');
         return $return;
     }
 }

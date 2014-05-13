@@ -35,8 +35,6 @@ class JFormFieldMctextarea extends MiniCCKFields
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = htmlspecialchars_decode($this->value);
-
-
         $field = plgSystemMinicck::getCustomField($name);
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
@@ -56,6 +54,15 @@ class JFormFieldMctextarea extends MiniCCKFields
 
     static function  cleanValue($field, $value){
         $return = htmlspecialchars($value);
+        return $return;
+    }
+
+    static function getFilterInput($field)
+    {
+        $values = JFactory::getApplication()->getUserState('minicck.filter', array());
+        $field['params'] = self::prepareParams($field['params']);
+        $field['selectedValues'] = isset($values[$field['name']]) ? $values[$field['name']] : '';
+        $return = self::loadTemplate('mctextarea', $field, 'filter');
         return $return;
     }
 }

@@ -79,4 +79,33 @@ class JFormFieldMccheckbox extends MiniCCKFields
 
         return $return;
     }
+
+    static function prepareParams($params)
+    {
+        $data = array();
+        $tmpRows = explode("\n", $params);
+        if(count($tmpRows)>0)
+        {
+            foreach($tmpRows as $tmpRow)
+            {
+                $elements = explode("::", $tmpRow);
+                if(count($elements) > 1)
+                {
+                    $data[$elements[0]] = isset($elements[1]) ? trim($elements[1]) : '';
+                }
+            }
+        }
+        return $data;
+    }
+
+
+    static function getFilterInput($field)
+    {
+        $values = JFactory::getApplication()->getUserState('minicck.filter', array());
+        $field['params'] = self::prepareParams($field['params']);
+        $value = isset($values[$field['name']]) ? $values[$field['name']] : array();
+        $field['selectedValues'] = (!is_array($value)) ? array($value) : $value;
+        $return = self::loadTemplate('mccheckbox', $field, 'filter');
+        return $return;
+    }
 }
