@@ -715,7 +715,15 @@ HTML;
         $flipColumns = array_flip($columns);
 
         //удаляем из массива служебные поля
-        unset($columns[$flipColumns['id']],$columns[$flipColumns['content_id']],$columns[$flipColumns['field_values']]);
+        if(isset($columns[$flipColumns['id']]))
+            unset($columns[$flipColumns['id']]);
+        if(isset($columns[$flipColumns['content_id']]))
+            unset($columns[$flipColumns['content_id']]);
+        if(isset($columns[$flipColumns['field_values']]))
+            unset($columns[$flipColumns['field_values']]);
+        if(isset($columns[$flipColumns['content_type']]))
+            unset($columns[$flipColumns['content_type']]);
+
 
         //формируем новые и удаленные поля
         foreach($customfields as $k => $v)
