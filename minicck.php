@@ -715,13 +715,13 @@ HTML;
         $flipColumns = array_flip($columns);
 
         //удаляем из массива служебные поля
-        if(isset($columns[$flipColumns['id']]))
+        if(isset($flipColumns['id']))
             unset($columns[$flipColumns['id']]);
-        if(isset($columns[$flipColumns['content_id']]))
+        if(isset($flipColumns['content_id']))
             unset($columns[$flipColumns['content_id']]);
-        if(isset($columns[$flipColumns['field_values']]))
+        if(isset($flipColumns['field_values']))
             unset($columns[$flipColumns['field_values']]);
-        if(isset($columns[$flipColumns['content_type']]))
+        if(isset($flipColumns['content_type']))
             unset($columns[$flipColumns['content_type']]);
 
 
