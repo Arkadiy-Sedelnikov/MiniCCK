@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="module" version="3.1" client="site" method="upgrade">
+	<name>MOD_MINICCK_FILTER</name>
+	<author>Joomla! Project</author>
+	<creationDate>August 2011</creationDate>
+	<copyright>(C) 2005 - 2013 Open Source Matters. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
+	<authorEmail>admin@joomla.org</authorEmail>
+	<authorUrl>www.joomla.org</authorUrl>
+	<version>3.0.0</version>
+	<description>MOD_MINICCK_FILTER_XML_DESCRIPTION</description>
+	<files>
+		<folder>tmpl</folder>
+		<folder>elements</folder>
+		<filename module="mod_minicck_filter">mod_minicck_filter.php</filename>
+		<filename>helper.php</filename>
+		<filename>index.html</filename>
+		<filename>mod_minicck_filter.xml</filename>
+	</files>
+	<languages>
+		<language tag="en-GB">language/en-GB/en-GB.mod_minicck_filter.ini</language>
+		<language tag="en-GB">language/en-GB/en-GB.mod_minicck_filter.sys.ini</language>
+		<language tag="ru-RU">language/ru-RU/ru-RU.mod_minicck_filter.ini</language>
+		<language tag="ru-RU">language/ru-RU/ru-RU.mod_minicck_filter.sys.ini</language>
+	</languages>
+
+	<config>
+		<fields name="params" addfieldpath="/modules/mod_minicck_filter/elements">
+			<fieldset name="basic">
+				<field
+					name="searchfields"
+					type="searchfields"
+					default=""
+                    multiple="multiple"
+					label="MOD_MINICCK_SEARCHFIELDS"
+					description="MOD_MINICCK_SEARCHFIELDS_DESC" />
+			</fieldset>
+			<fieldset name="advanced">
+
+			</fieldset>
+		</fields>
+	</config>
+</extension>
