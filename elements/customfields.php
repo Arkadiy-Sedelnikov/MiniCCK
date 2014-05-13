@@ -71,7 +71,7 @@ HTML;
 
         if (empty($pluginParams->customfields))
         {
-            $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][0][type]', 'class="type inputbox" onchange="loadExtraFields(this.value, 0)"', 'value', 'text');
+            $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][0][type]', 'class="type inputbox" onchange="loadExtraFields(this, 0)"', 'value', 'text');
 
             $html .= <<<HTML
 <div id="field_0" class="field_contayner">

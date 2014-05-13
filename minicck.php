@@ -204,14 +204,10 @@ class plgSystemMinicck extends JPlugin
             $articleId = (int)$data["id"];
         }
 
-
         $dataMinicck = $this->getData($articleId);
 
-        if($dataMinicck === false)
-        {
-            return false;
-        }
         $options = $this->gerContentTypeOptions();
+
         if(!$options)
         {
             echo '
@@ -431,12 +427,14 @@ HTML;
         $articleId = $isTags ? $article->content_item_id : $article->id;
         $body = $isTags ? 'core_body' : 'text';
 
-        $result = (object)$this->getData($articleId);
+        $result = $this->getData($articleId);
 
         if(empty($result))
         {
             return;
         }
+
+        $result = (object)$result;
 
         if(!self::$customfields)
         {

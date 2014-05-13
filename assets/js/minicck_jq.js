@@ -1,9 +1,9 @@
-function fieldAdd(){
-    var counter = jQuery('#numFields');
+function fieldAdd()
+{
     var numFields = 0;
     var fieldName = 1;
 
-    while (jQuery('#field_'+(numFields+1)).length > 0) {
+    while (jQuery('#field_'+(numFields)).length > 0) {
         numFields ++;
     }
 
@@ -28,7 +28,7 @@ function fieldAdd(){
 
     jQuery('select.type', newField)
         .attr('name', 'jform[params][customfields]['+numFields+'][type]')
-        .attr('onchange', 'loadExtraFields(this.value, '+numFields+')')
+        .attr('onchange', 'loadExtraFields(this, '+numFields+')')
         .prop('selectedIndex',0)
         .show();
 
@@ -46,9 +46,8 @@ function fieldAdd(){
 
     newField.attr('id', 'field_'+numFields);
 
+    jQuery('#numFields').before(newField);
 
-    counter.before(newField);
-    counter.val(numFields+1);
     jQuery('select.type', '#field_'+numFields)
         .chosen({
             disable_search_threshold : 10,
@@ -59,12 +58,11 @@ function fieldAdd(){
 }
 
 
-function fieldDel(id){
-    var counter = jQuery('#numFields');
-    var numFields = parseInt(counter.val());
+function fieldDel(id)
+{
+    var numFields = jQuery('.field_contayner').length;
     if(numFields > 1){
         jQuery('#'+id).remove();
-        counter.val(jQuery('.field_contayner').length);
     }
 }
 
@@ -78,8 +76,7 @@ function anchor(){
 }
 
 function contentTypeAdd(){
-    var counter = jQuery('#numTypes');
-    var numFields = parseInt(counter.val());
+    var numFields = jQuery('.content_type_contayner').length;
     var type = jQuery('div.content_type_contayner:first');
     var newContentType = type.clone();
 
@@ -131,9 +128,7 @@ function contentTypeAdd(){
 
     newContentType.attr('id', 'content_type_'+numFields);
 
-
-    counter.before(newContentType);
-    counter.val(numFields+1);
+    jQuery('#numTypes').before(newContentType);
 
     window.location.hash = 'content_type_'+numFields;
     anchor();
@@ -141,11 +136,10 @@ function contentTypeAdd(){
 
 function contentTypeDel(id)
 {
-    var counter = jQuery('#numTypes');
-    var numFields = parseInt(counter.val());
-    if(numFields > 1){
+    var numFields = jQuery('.content_type_contayner').length;
+    if(numFields > 1)
+    {
         jQuery('#'+id).remove();
-        counter.val(jQuery('.content_type_contayner').length);
     }
 }
 
@@ -225,8 +219,9 @@ function reloadMinicckFields(element){
     }
 }
 
-function loadExtraFields(field, id)
+function loadExtraFields(select, id)
 {
+    var field = jQuery(select).val();
     var extraParamsDiv = jQuery('#extra_params_'+id);
     extraParamsDiv.text('');
 
