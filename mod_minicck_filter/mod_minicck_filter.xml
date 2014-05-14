@@ -34,6 +34,17 @@
                     multiple="multiple"
 					label="MOD_MINICCK_SEARCHFIELDS"
 					description="MOD_MINICCK_SEARCHFIELDS_DESC" />
+                <field
+                        name="categories"
+                        type="category"
+                        extension='com_content'
+                        default="0"
+                        multiple="multiple"
+                        label="MOD_MINICCK_ALLOWED_CATEGORY"
+                        description="MOD_MINICCK_ALLOWED_CATEGORY_DESC"
+                        >
+                    <option value="-1">JALL</option>
+                        </field>
 			</fieldset>
 			<fieldset name="advanced">
 
