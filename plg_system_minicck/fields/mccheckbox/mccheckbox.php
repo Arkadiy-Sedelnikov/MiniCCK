@@ -99,13 +99,18 @@ class JFormFieldMccheckbox extends MiniCCKFields
     }
 
 
-    static function getFilterInput($field)
+    static function getFilterInput($field, $category_id)
     {
-        $values = JFactory::getApplication()->getUserState('minicck.filter', array());
+        $values = JFactory::getApplication()->getUserState('cat_'.$category_id.'.minicckfilter', array());
         $field['params'] = self::prepareParams($field['params']);
         $value = isset($values[$field['name']]) ? $values[$field['name']] : array();
         $field['selectedValues'] = (!is_array($value)) ? array($value) : $value;
         $return = self::loadTemplate('mccheckbox', $field, 'filter');
         return $return;
+    }
+
+    static function buildQuery(&$query, $fieldName, $value)
+    {
+        parent::buildQuery($query, $fieldName, $value, 'find_in_set_multi');
     }
 }

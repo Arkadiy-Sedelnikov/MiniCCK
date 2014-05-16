@@ -82,12 +82,17 @@ class JFormFieldMcselect extends MiniCCKFields
         return $data;
     }
 
-    static function getFilterInput($field)
+    static function getFilterInput($field, $category_id)
     {
-        $values = JFactory::getApplication()->getUserState('minicck.filter', array());
+        $values = JFactory::getApplication()->getUserState('cat_'.$category_id.'.minicckfilter', array());
         $field['params'] = self::prepareParams($field['params']);
         $field['selectedValues'] = isset($values[$field['name']]) ? $values[$field['name']] : '';
         $return = self::loadTemplate('mcselect', $field, 'filter');
         return $return;
+    }
+
+    static function buildQuery(&$query, $fieldName, $value)
+    {
+        parent::buildQuery($query, $fieldName, $value, 'eq');
     }
 }

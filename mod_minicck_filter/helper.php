@@ -13,7 +13,7 @@ require_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
 
 class ModMinicckFilterHelper
 {
-	public static function getFields($params)
+	public static function getFields($params, $category_id)
 	{
 		$fields = array();
         $enabledFields = $params->get('searchfields', array());
@@ -50,7 +50,7 @@ class ModMinicckFilterHelper
 
             if($className != false && method_exists($className,'getFilterInput'))
             {
-                $fields[] = $className::getFilterInput($v);
+                $fields[] = $className::getFilterInput($v, $category_id);
             }
         }
 

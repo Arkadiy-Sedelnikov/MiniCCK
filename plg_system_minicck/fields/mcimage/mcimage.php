@@ -28,10 +28,6 @@ class JFormFieldMcimage extends MiniCCKFields
 
     function getInput()
     {
-
-
-
-
         if(!defined('PLG_MINICCK_MCIMAGE_LOADED')){
             define('PLG_MINICCK_MCIMAGE_LOADED', 1);
             JHtml::_('behavior.modal');
@@ -51,8 +47,6 @@ class JFormFieldMcimage extends MiniCCKFields
             $script[] = '	}';
             JFactory::getDocument()->addScriptDeclaration(implode("\n", $script));
         }
-
-
 
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
@@ -95,8 +89,9 @@ class JFormFieldMcimage extends MiniCCKFields
         {
             $value = '/'.$value;
         }
-        else{
-            $value = '';
+        else
+        {
+            return '';
         }
 
         $return = self::loadTemplate('mcimage', array('value' => $value, 'extraparams' => $field['extraparams']));

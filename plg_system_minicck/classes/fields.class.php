@@ -43,4 +43,44 @@ class MiniCCKFields
     {
         return trim($params);
     }
+
+    static function buildQuery(&$query, $fieldName, $value, $type = 'eq')
+    {
+        $db = JFactory::getDbo();
+
+        if((is_string($value) && empty($value)) || (is_array($value) && !count($value)))
+        {
+            return;
+        }
+
+        switch($type)
+        {
+            case 'like' :
+                    $query->where($db->quoteName($fieldName).' LIKE '.$db->quote('%'.$value.'%'));
+                break;
+
+            case 'find_in_set_multi' :
+                    $q = array();
+                    foreach($value as $v)
+                    {
+                        $q[] = '(FIND_IN_SET('.$db->quote($v).', '.$db->quoteName($fieldName).')>0)';
+                    }
+                    $q = '('.implode(' OR ', $q).')';
+                    $query->where($q);
+                break;
+
+            case 'find_in_set' :
+                    $query->where('(FIND_IN_SET('.$db->quote($value).', '.$db->quoteName($fieldName).')>0)');
+                break;
+
+            case 'eq' :
+            default :
+                    $query->where($db->quoteName($fieldName).' = '.$db->quote($value));
+                break;
+        }
+
+
+
+
+    }
 }

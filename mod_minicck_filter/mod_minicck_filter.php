@@ -12,11 +12,15 @@ defined('_JEXEC') or die;
 // Include the helper.
 require_once __DIR__ . '/helper.php';
 
-$input = JFactory::getApplication()->input;
+$app = JFactory::getApplication();
+$input = $app->input;
+
 $option = $input->getString('option', '');
 $view = $input->getString('view', '');
 $catid = $input->getInt('catid', 0);
 $id = $input->getInt('id', 0);
+$minicckfilter = $input->get('minicckfilter', array(), 'array');
+
 $allowedCats = $params->get('categories', array());
 
 if($view == 'category')
@@ -24,15 +28,21 @@ if($view == 'category')
     $catid = $id;
 }
 
-if($option != 'com_content' || (!in_array($catid, $allowedCats) && $allowedCats[0] != -1))
+if($option != 'com_content' || (!in_array($catid, $allowedCats) && $allowedCats[0] != -1) || $catid == 0)
 {
     return;
 }
 
 JHtml::_('behavior.framework');
 
-JFactory::getApplication()->getUserStateFromRequest('minicck.filter', 'minicckfilter', array(), 'array');
+$url = JUri::getInstance();
+$action = $url->toString();
 
-$fields = ModMinicckFilterHelper::getFields($params);
+if(count($minicckfilter))
+{
+    $app->setUserState('cat_'.$catid.'.minicckfilter', $minicckfilter);
+}
+
+$fields = ModMinicckFilterHelper::getFields($params, $catid);
 
 require JModuleHelper::getLayoutPath('mod_minicck_filter', $params->get('layout', 'default'));

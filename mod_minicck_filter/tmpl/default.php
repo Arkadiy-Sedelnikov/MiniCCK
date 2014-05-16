@@ -10,13 +10,15 @@
 defined('_JEXEC') or die;
 ?>
 
-<form id="mod-finder-searchform" action="<?php echo JUri::current(); ?>" method="post" class="form-search">
+<form id="mod-finder-searchform" action="<?php echo $action; ?>" method="post" class="form-search">
 	<div class="minicck_filter">
         <?php foreach($fields as $v) : ?>
             <?php echo $v; ?>
             <div class="clr"></div>
         <?php endforeach; ?>
         <input type="submit" title="Submit" class="btn btn-primary btn-block"/>
-        <button class="btn btn-info btn-block"><?php echo JText::_('MOD_MINICCK_RESET'); ?></button>
+        <button class="btn btn-info btn-block" onclick="jQuery(':input','#mod-finder-searchform').not(':button, :submit, :reset, :hidden').val('').removeAttr('checked').removeAttr('selected');">
+            <?php echo JText::_('MOD_MINICCK_RESET'); ?>
+        </button>
 	</div>
 </form>

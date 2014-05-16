@@ -744,4 +744,58 @@ HTML;
 
         return true;
     }
+
+    public function onGetContentItems(&$itemsModel)
+    {
+        $app = JFactory::getApplication();
+        $input = $app->input;
+        $option = $input->getString('option', '');
+        $view = $input->getString('view', '');
+        $catid = $input->getInt('catid', 0);
+        $id = $input->getInt('id', 0);
+
+        if($view == 'category')
+        {
+            $catid = $id;
+        }
+
+        if($catid == 0)
+        {
+            return;
+        }
+
+        $filterData = $app->getUserStateFromRequest('cat_'.$catid.'.minicckfilter', 'minicckfilter', array(), 'array');
+
+        if(!count($filterData))
+        {
+            return;
+        }
+
+        if(!self::$customfields)
+        {
+            $this->setCustomFields();
+        }
+
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true);
+        $query->select('content_id');
+        $query->from('#__minicck');
+
+        foreach($filterData as $k=>$v)
+        {
+            $field = self::getCustomField($k);
+
+            $className = $this->loadElement($field);
+
+            if($className != false && method_exists($className,'buildQuery'))
+            {
+                $className::buildQuery($query, $k, $v);
+            }
+        }
+
+        $result = $db->setQuery($query)->loadColumn();
+        $result = (empty($result)) ? array(0) : $result;
+
+        $itemsModel->setState('filter.article_id', $result);
+    }
 }

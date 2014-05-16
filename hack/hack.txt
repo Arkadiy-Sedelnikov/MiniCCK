@@ -1,0 +1,14 @@
+
+/components/com_content/models/category.php
+
+
+После всех $model->setState() и перед запуском функции $model->getItems(); вставить:
+
+
+//Arkadiy hack
+$dispatcher = JEventDispatcher::getInstance();
+// Include the content plugins for the change of category state event.
+JPluginHelper::importPlugin('content');
+// Trigger the onCategoryChangeState event.
+$dispatcher->trigger('onGetContentItems', array(&$model));
+//end of Arkadiy hack
