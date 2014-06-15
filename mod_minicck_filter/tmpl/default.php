@@ -14,7 +14,7 @@ defined('_JEXEC') or die;
 	<div class="minicck_filter">
         <?php foreach($fields as $v) : ?>
             <?php echo $v; ?>
-            <div class="clr"></div>
+            <div style="clear: both;"></div>
         <?php endforeach; ?>
         <input type="submit" title="Submit" class="btn btn-primary btn-block"/>
         <button class="btn btn-info btn-block" onclick="jQuery(':input','#mod-finder-searchform').not(':button, :submit, :reset, :hidden').val('').removeAttr('checked').removeAttr('selected');">
