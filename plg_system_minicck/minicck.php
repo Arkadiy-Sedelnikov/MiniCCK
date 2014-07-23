@@ -399,7 +399,7 @@ HTML;
     {
         $config = $this->config["params"];
 
-        if(($context != 'com_content.article' && $context != 'com_content.category' && $context != 'com_tags.tag')
+        if(($context != 'com_content.article' && $context != 'com_content.category' && $context != 'com_tags.tag' && $context != 'com_content.featured')
             || ($context == 'com_content.category' && !$config->allow_in_category)
             || ($context == 'com_tags.tag' && !$config->allow_in_tags)
             || ($context == 'com_content.featured' && !$config->allow_in_featured)
