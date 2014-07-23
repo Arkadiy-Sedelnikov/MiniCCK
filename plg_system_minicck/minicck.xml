@@ -85,6 +85,26 @@
                     <option value="0">JNO</option>
                 </field>
                 <field
+                        name="allow_in_tags"
+                        type="radio"
+                        class="btn-group"
+                        default="0"
+                        label="PLG_MINICCK_ALLOW_IN_TAGS"
+                        description="PLG_MINICCK_ALLOW_IN_TAGS_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
+                        name="allow_in_featured"
+                        type="radio"
+                        class="btn-group"
+                        default="0"
+                        label="PLG_MINICCK_ALLOW_IN_FEATURED"
+                        description="PLG_MINICCK_ALLOW_IN_FEATURED_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
                         name="content_layout"
                         type="filelist"
                         directory="/plugins/system/minicck/tmpl"
