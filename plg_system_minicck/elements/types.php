@@ -176,20 +176,20 @@ HTML;
                 <label style="font-weight: bold;">{$field->title}</label>
         	</div>
         	<div class="controls">
-        	<label for="$fieldName-category" style="float: left;">$cat
+        	<label for="$fieldName-$typeId-category" style="float: left;">$cat
                 <input
                     type="checkbox"
-                    id="$fieldName-category"
+                    id="$fieldName-$typeId-category"
                     name="jform[params][content_types][$typeId][fields][$fieldName][category]"
                     value="1"
                     class="field_name inputbox"
                     aria-invalid="false"
                     $checkedCat
                     /></label>
-        	<label for="$fieldName-content" style="float: left;">$content
+        	<label for="$fieldName-$typeId-content" style="float: left;">$content
                 <input
                     type="checkbox"
-                    id="$fieldName-content"
+                    id="$fieldName-$typeId-content"
                     name="jform[params][content_types][$typeId][fields][$fieldName][content]"
                     value="1"
                     class="field_name inputbox"
