@@ -48,6 +48,7 @@ class MiniCCKHTML
 
     public function __construct($customfields)
     {
+        $this->data = empty($this->data) ? new stdClass() : $this->data;
         self::$customfields = $customfields;
     }
 
