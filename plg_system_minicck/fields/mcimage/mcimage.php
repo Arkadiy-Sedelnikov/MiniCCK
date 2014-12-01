@@ -55,13 +55,9 @@ class JFormFieldMcimage extends MiniCCKFields
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
 
-
         $field = plgSystemMinicck::getCustomField($name);
         $directory = trim($field["params"]);
-        $directory = (!empty($directory)) ? $directory : '/images';
-        if(substr($directory, 0, 1) !== '/') $directory = '/'.$directory;
-        if(!is_dir(JPATH_ROOT.$directory))$directory = '/images/';
-        if(substr($directory, -1) !== '/') $directory = $directory.'/';
+        $directory = (!empty($directory)) ? $directory : '';
 
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
