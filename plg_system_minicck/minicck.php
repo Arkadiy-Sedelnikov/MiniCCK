@@ -799,4 +799,33 @@ HTML;
 
         $itemsModel->setState('filter.article_id', $result);
     }
+
+    /** Подмена модели категории контента.
+     * @throws Exception
+     */
+    public function onAfterRoute()
+    {
+        if(JFactory::getApplication()->isAdmin() || !$this->params->get('redefine_cat_model',0))
+        {
+            return;
+        }
+
+        $input = JFactory::getApplication()->input;
+        $option = $input->getString('option', '');
+        $view = $input->getString('view', '');
+        $catid = $input->getInt('catid', 0);
+        $id = $input->getInt('id', 0);
+
+        if($view == 'category')
+        {
+            $catid = $id;
+        }
+
+        if($option != 'com_content' || $catid == 0)
+        {
+            return;
+        }
+
+        require_once JPATH_ROOT.'/plugins/system/minicck/classes/category.php';
+    }
 }

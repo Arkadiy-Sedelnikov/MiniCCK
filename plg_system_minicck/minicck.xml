@@ -164,6 +164,16 @@
                     <option value="1">JYES</option>
                     <option value="0">JNO</option>
                 </field>
+                <field
+                        name="redefine_cat_model"
+                        type="radio"
+                        class="btn-group"
+                        default="0"
+                        label="PLG_MINICCK_REDEFINE_CAT_MODEL"
+                        description="PLG_MINICCK_REDEFINE_CAT_MODEL_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
 			</fieldset>
 		</fields>
 	</config>
