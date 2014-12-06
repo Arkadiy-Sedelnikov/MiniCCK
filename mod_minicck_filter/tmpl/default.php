@@ -21,4 +21,5 @@ defined('_JEXEC') or die;
             <?php echo JText::_('MOD_MINICCK_RESET'); ?>
         </button>
 	</div>
+    <input type="hidden" name="minicckfilter[is_minicck_filter]" value="1"/>
 </form>
