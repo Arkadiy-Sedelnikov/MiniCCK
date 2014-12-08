@@ -6,6 +6,4 @@
  */
 
 defined('_JEXEC') or die;
-?>
-
-<?php echo $data; ?>
+?><?php echo $data; ?>

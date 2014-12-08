@@ -92,7 +92,7 @@ class JFormFieldMcradio extends MiniCCKFields
         return $return;
     }
 
-    static function buildQuery(&$query, $fieldName, $value)
+    static function buildQuery(&$query, $fieldName, $value, $type = 'eq')
     {
         parent::buildQuery($query, $fieldName, $value, 'eq');
     }

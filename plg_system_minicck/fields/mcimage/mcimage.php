@@ -55,6 +55,7 @@ class JFormFieldMcimage extends MiniCCKFields
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
 
+
         $field = plgSystemMinicck::getCustomField($name);
         $directory = trim($field["params"]);
         $directory = (!empty($directory)) ? $directory : '';
@@ -81,13 +82,14 @@ class JFormFieldMcimage extends MiniCCKFields
 
     static function  getValue($field, $value)
     {
-        if(!empty($value) && substr($value, 0, 1) !== '/')
-        {
-            $value = '/'.$value;
-        }
-        else
+        if(empty($value))
         {
             return '';
+        }
+
+        if(substr($value, 0, 1) != '/' && substr($value, 0, 4) != 'http')
+        {
+            $value = '/'.$value;
         }
 
         $return = self::loadTemplate('mcimage', array('value' => $value, 'extraparams' => $field['extraparams']));

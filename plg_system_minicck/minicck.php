@@ -235,7 +235,7 @@ class plgSystemMinicck extends JPlugin
         $js = 'var minicckTypeFields = [];';
         foreach (self::$contentTypes as $type)
         {
-            if(count($type->fields))
+            if(isset($type->fields) && count($type->fields))
             {
                 $js .= "\n minicckTypeFields['$type->name']=[";
                 foreach($type->fields as $k => $v)

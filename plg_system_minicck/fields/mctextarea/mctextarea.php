@@ -66,7 +66,7 @@ class JFormFieldMctextarea extends MiniCCKFields
         return $return;
     }
 
-    static function buildQuery(&$query, $fieldName, $value)
+    static function buildQuery(&$query, $fieldName, $value, $type = 'like')
     {
         parent::buildQuery($query, $fieldName, $value, 'like');
     }
