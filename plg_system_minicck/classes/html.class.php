@@ -69,12 +69,11 @@ class MiniCCKHTML
 
         if($className != false && method_exists($className,'getValue'))
         {
-            return $className::getValue($field, $value);
+            $value = $className::getValue($field, $value);
         }
-        else
-        {
-            return $value;
-        }
+        
+        $value = trim($value);
+        return $value;
     }
 
     /** Загружаем элемент, вычисляем имя класса элемента
