@@ -5,6 +5,9 @@
  * Date: 25.01.14
  * Time: 23:26
  */
+
+jimport('joomla.string.string');
+
 class MiniCCKHTML
 {
     private $data;
@@ -15,7 +18,7 @@ class MiniCCKHTML
     public function getFieldValue($articleId, $fname)
     {
         $data = !empty($this->data->$articleId->$fname) ? $this->data->$articleId->$fname : '';
-        $result = $this->getValue($fname,$data);
+        $result = JString::trim($this->getValue($fname,$data));
         $result= empty($result) ? '' : $result;
         return $result;
     }
@@ -69,11 +72,12 @@ class MiniCCKHTML
 
         if($className != false && method_exists($className,'getValue'))
         {
-            $value = $className::getValue($field, $value);
+            return $className::getValue($field, $value);
         }
-        
-        $value = trim($value);
+        else
+        {
         return $value;
+        }
     }
 
     /** Загружаем элемент, вычисляем имя класса элемента
