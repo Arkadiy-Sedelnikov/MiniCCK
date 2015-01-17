@@ -115,35 +115,14 @@ class JFormFieldSlider extends MiniCCKFields
         }
 
         $params = $field['extraparams'];
-        $params->id = $field["name"];
 
-        $autoplay = (!empty($params->autoplay)) ? 'true' : 'false';
-        $interval = (!empty($params->interval)) ? $params->interval : '4000';
+        $params->id = $field["name"];
+        $params->autoplay = (!empty($params->autoplay)) ? 'true' : 'false';
+        $params->interval = (!empty($params->interval)) ? $params->interval : '4000';
         $params->width = (!empty($params->width)) ? $params->width : 940;
         $params->heigth = (!empty($params->heigth)) ? $params->heigth : 528;
-        $management = (!empty($params->management)) ? 'true' : 'false';
-        $rootUri = JUri::root();
-
-        $script = <<<SCRIPT
-        jQuery(document).ready(function ($){
-            $('#{$params->id}_slider').slidesjs({
-              width: {$params->width},
-              height: {$params->heigth},
-              play: {
-                active: $management,
-                auto: $autoplay,
-                interval: $interval,
-                swap: true
-              }
-            });
-        });
-SCRIPT;
-
-        JHtml::_('behavior.framework');
-        $doc = JFactory::getDocument();
-        $doc->addScript($rootUri.'plugins/system/minicck/fields/slider/assets/js/jquery.slides.min.js');
-        $doc->addStyleSheet($rootUri.'plugins/system/minicck/fields/slider/assets/css/style.css');
-        $doc->addScriptDeclaration($script);
+        $params->management = (!empty($params->management)) ? 'true' : 'false';
+        $params->rootUri = JUri::root();
 
         $return = self::loadTemplate('slider', array('value' => $value, 'extraparams' => $params));
         return $return;
