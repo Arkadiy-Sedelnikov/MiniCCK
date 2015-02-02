@@ -23,10 +23,20 @@ class MiniCCKHTML
         return $result;
     }
 
+    public function getFieldData($articleId, $fname)
+    {
+        return !empty($this->data->$articleId->$fname) ? $this->data->$articleId->$fname : '';
+    }
+
     public function getFieldLabel($fname)
     {
         $result= empty(self::$customfields[$fname]["title"]) ? '' : self::$customfields[$fname]["title"];
         return $result;
+    }
+
+    public function getArticleType($articleId)
+    {
+        return !empty($this->data->$articleId->content_type) ? $this->data->$articleId->content_type : '';
     }
 
     public function get($articleId)

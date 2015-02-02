@@ -474,6 +474,7 @@ HTML;
 
         if($this->params->get('load_object', 0) == 1)
         {
+            $result->content_type = $content_type;
             $article->minicck->set($articleId, $result);
         }
         else
