@@ -205,10 +205,17 @@ function reloadMinicckFields(element){
     if(count == 0)
         return;
 
-    jQuery('div.control-group', '#minicck').not('#minicck_content_type_contayner').hide();
-    jQuery('input', '#minicck').attr('disabled','disabled');
-    jQuery('select', '#minicck').not('#minicckcontent_type').attr('disabled','disabled');
-    jQuery('textarea', '#minicck').attr('disabled','disabled');
+    jQuery('div.control-group', '#minicck')
+        .not('#minicck_content_type_contayner')
+        .hide();
+    jQuery('input', '#minicck')
+        .not(' #minicck_multi_categories_chzn input')
+        .attr('disabled','disabled');
+    jQuery('select', '#minicck')
+        .not('#minicckcontent_type, #minicck_multi_categories')
+        .attr('disabled','disabled');
+    jQuery('textarea', '#minicck')
+        .attr('disabled','disabled');
     for (var i=0; i < typeFields.length; i++)
     {
         var cont = jQuery('div.control-group.'+typeFields[i]);

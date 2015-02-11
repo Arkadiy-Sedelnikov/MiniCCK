@@ -80,11 +80,17 @@ class plgSystemMinicck extends JPlugin
                 $object = new stdClass();
                 $object->content_id = $articleId;
 
+                $config = $this->config["params"];
 
+                if(!empty($config->enable_multi_categories))
+                {
+                    $multiCats = (!empty($data['multi_categories'])) ? $data['multi_categories'] : array();
+                    $this->saveMultiCats($multiCats, $articleId);
+                }
 
                 foreach($data as $k => $v)
                 {
-                    if($k == 'content_type')
+                    if($k == 'content_type' || $k == 'multi_categories')
                     {
                         $object->$k = $v;
                         continue;
@@ -188,12 +194,13 @@ class plgSystemMinicck extends JPlugin
             || (!is_object($data) && !is_array($data))
         ) return true;
 
+        $config = $this->config["params"];
+        $articleId = 0;
+
         if(!self::$contentTypes)
         {
             $this->setContentTypes();
         }
-
-        $articleId = 0;
 
         if(is_object($data) && !empty($data->id))
         {
@@ -204,20 +211,39 @@ class plgSystemMinicck extends JPlugin
             $articleId = (int)$data["id"];
         }
 
+        $html = '<div class="tab-pane" id="minicck">';
+
+        if(!empty($config->enable_multi_categories))
+        {
+            $selectedCats = $this->getSelectedMultiCats($articleId);
+            $html .= '
+            <div class="control-group" id="minicck_content_type_contayner">
+                <label for="minicck_content_types" class="control-label" title="" >'.JText::_('PLG_MINICCK_CATEGORIES').'</label>
+                <div class="controls">
+                        <select name="minicck[multi_categories][]" id="minicck_multi_categories" multiple="multiple" size="10">
+                            '.JHtml::_('select.options',
+                            JHtml::_('category.categories', 'com_content', array('filter.published' => 1)),
+                            'value', 'text', $selectedCats).'
+			        </select>
+                </div>
+            </div>
+			';
+        }
+
         $dataMinicck = $this->getData($articleId);
 
         $options = $this->gerContentTypeOptions();
 
         if(!$options)
         {
-            echo '
-            <div class="tab-pane" id="minicck">
+            $html .= '
                 <div class="control-group" id="minicck_content_type_contayner">
                     '.JText::_('PLG_MINICCK_NO_TYPES_CREATED').'
                 </div>
                 <hr style="clear:both"/>
             </div>
             ';
+            echo $html;
             return true;
         }
 
@@ -250,8 +276,7 @@ class plgSystemMinicck extends JPlugin
 
         $label = JText::_('PLG_MINICCK_TYPE_CONTENT');
         $select = JHTML::_('select.genericlist', $options, 'minicck[content_type]', ' class="type inputbox" onchange="reloadMinicckFields(this)"', 'value', 'text', $contentType);
-        $html = <<<HTML
-        <div class="tab-pane" id="minicck">
+        $html .= <<<HTML
             <div class="control-group" id="minicck_content_type_contayner">
                 <label for="minicck_content_types" class="control-label" title="" >$label</label>
                 <div class="controls">$select</div>
@@ -378,6 +403,8 @@ HTML;
                 {
                     throw new Exception($db->getErrorMsg());
                 }
+
+                $this->deleteMultiCats($articleId);
             }
             catch (Exception $e)
             {
@@ -425,7 +452,19 @@ HTML;
             $article->minicck = MiniCCKHTML::getInstance(self::$customfields);
         }
 
-        $articleId = $isTags ? $article->content_item_id : $article->id;
+        if($isTags)
+        {
+            $articleId = $article->content_item_id;
+        }
+        else if(isset($article->id))
+        {
+            $articleId = $article->id;
+        }
+        else
+        {
+            return;
+        }
+
         $body = $isTags ? 'core_body' : 'text';
 
         $result = $this->getData($articleId);
@@ -747,6 +786,10 @@ HTML;
         return true;
     }
 
+    /**
+     * @param $itemsModel
+     * @throws Exception
+     */
     public function onGetContentItems(&$itemsModel)
     {
         $app = JFactory::getApplication();
@@ -768,37 +811,78 @@ HTML;
 
         $filterData = $app->getUserStateFromRequest('cat_'.$catid.'.minicckfilter', 'minicckfilter', array(), 'array');
 
-        if(!count($filterData))
+        $enable_multi_categories = $this->params->get('enable_multi_categories', 0);
+
+
+        if(!count($filterData) && !$enable_multi_categories)
         {
             return;
         }
 
-        if(!self::$customfields)
+        $filterArticles = $catArticles = array();
+
+        $enableFilter = count($filterData) > 0;
+
+        if($enableFilter)
         {
-            $this->setCustomFields();
-        }
-
-        $db = JFactory::getDbo();
-        $query = $db->getQuery(true);
-        $query->select('content_id');
-        $query->from('#__minicck');
-
-        foreach($filterData as $k=>$v)
-        {
-            $field = self::getCustomField($k);
-
-            $className = $this->loadElement($field);
-
-            if($className != false && method_exists($className,'buildQuery'))
+            if(!self::$customfields)
             {
-                $className::buildQuery($query, $k, $v);
+                $this->setCustomFields();
             }
+
+            $db = JFactory::getDbo();
+            $query = $db->getQuery(true);
+            $query->select('content_id');
+            $query->from('#__minicck');
+
+            foreach($filterData as $k=>$v)
+            {
+                $field = self::getCustomField($k);
+
+                $className = $this->loadElement($field);
+
+                if($className != false && method_exists($className,'buildQuery'))
+                {
+                    $className::buildQuery($query, $k, $v);
+                }
+            }
+
+            $filterArticles = $db->setQuery($query)->loadColumn();
+            $filterArticles = (empty($filterArticles)) ? array() : $filterArticles;
         }
 
-        $result = $db->setQuery($query)->loadColumn();
-        $result = (empty($result)) ? array(0) : $result;
+        if($enable_multi_categories)
+        {
+            $catArticles = $this->getMultiCatsArticles($catid);
+            $catArticles = (empty($catArticles)) ? array() : $catArticles;
+        }
 
-        $itemsModel->setState('filter.article_id', $result);
+        if($enable_multi_categories && $enableFilter)
+        {
+            $result = array_intersect($catArticles, $filterArticles);
+        }
+        else if($enable_multi_categories)
+        {
+            $result = $catArticles;
+        }
+        else if($enableFilter)
+        {
+            $result = $filterArticles;
+        }
+        else
+        {
+            $result = array();
+        }
+
+        if(count($result))
+        {
+            if($enable_multi_categories)
+            {
+                $itemsModel->setState('filter.category_id', '');
+            }
+            $itemsModel->setState('filter.article_id.include', true);
+            $itemsModel->setState('filter.article_id', $result);
+        }
     }
 
     /** Подмена модели категории контента.
@@ -806,7 +890,8 @@ HTML;
      */
     public function onAfterRoute()
     {
-        if(JFactory::getApplication()->isAdmin() || !$this->params->get('redefine_cat_model',0))
+        if(JFactory::getApplication()->isAdmin()
+            || (!$this->params->get('redefine_cat_model',0) && !$this->params->get('enable_multi_categories',0)))
         {
             return;
         }
@@ -828,5 +913,96 @@ HTML;
         }
 
         require_once JPATH_ROOT.'/plugins/system/minicck/classes/category.php';
+    }
+
+
+    private function saveMultiCats($multiCats, $articleId)
+    {
+        $multiCats = array_unique($multiCats);
+
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true);
+
+        $query->delete('`#__minicck_categories`')
+            ->where('`article_id` = '.$db->quote($articleId));
+        $db->setQuery($query)->execute();
+
+        if(count($multiCats) > 0)
+        {
+            foreach($multiCats as $v)
+            {
+                $v = (int)$v;
+
+                if($v == 0)
+                {
+                    continue;
+                }
+                $object = new stdClass();
+                $object->category_id = $v;
+                $object->article_id = $articleId;
+                $db->insertObject('#__minicck_categories', $object);
+            }
+        }
+    }
+
+    private function deleteMultiCats($articleId)
+    {
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true);
+
+        $query->delete('`#__minicck_categories`')
+            ->where('`article_id` = '.$db->quote($articleId));
+        $db->setQuery($query)->execute();
+    }
+
+    private function getSelectedMultiCats($articleId)
+    {
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true);
+        $query->select('`category_id`')
+            ->from('`#__minicck_categories`')
+            ->where('`article_id` = '.$db->quote($articleId));
+        $result = $db->setQuery($query)->loadColumn();
+
+        if(!is_array($result) || !count($result))
+        {
+            return array();
+        }
+        return $result;
+    }
+
+    private function getMultiCatsArticles($categoryId)
+    {
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true);
+        $query->select('`article_id`')
+            ->from('`#__minicck_categories`')
+            ->where('`category_id` = '.$db->quote($categoryId));
+        $result1 = $db->setQuery($query)->loadColumn();
+
+        if(!is_array($result1) || !count($result1))
+        {
+            $result1 = array();
+        }
+
+        $query->clear()
+            ->select('`id`')
+            ->from('`#__content`')
+            ->where('`catid` = '.$db->quote($categoryId));
+        $result2 = $db->setQuery($query)->loadColumn();
+
+        if(!is_array($result2) || !count($result2))
+        {
+            $result2 = array();
+        }
+
+        $result = array_merge($result1, $result2);
+        $result = array_unique($result);
+
+        if(!is_array($result) || !count($result))
+        {
+            return array();
+        }
+        return $result;
     }
 }
