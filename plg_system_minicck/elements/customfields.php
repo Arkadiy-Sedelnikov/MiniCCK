@@ -153,6 +153,8 @@ HTML;
                                 }
                             }
 
+                            $value = ($value == '') ? 0 : $value;
+
                             $input = JHTML::_('select.genericlist', $options, 'jform[params][customfields][' . $k . '][extraparams]['.$extraparam['name'].']', $attr, 'value', 'text', $value);
                         }
                         else
