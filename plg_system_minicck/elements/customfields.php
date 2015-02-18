@@ -172,7 +172,7 @@ HTML;
                     }
                 }
 
-                $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][' . $k . '][type]', 'class="type inputbox" onchange="loadExtraFields(this.value, '.$k.')"', 'value', 'text', $custom->type);
+                $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][' . $k . '][type]', 'class="type inputbox" onchange="loadExtraFields(this, '.$k.')"', 'value', 'text', $custom->type);
                 $html .= <<<HTML
 <div id="field_$k" class="field_contayner">
 <hr style="clear:both"/>

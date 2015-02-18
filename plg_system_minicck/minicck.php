@@ -426,6 +426,11 @@ HTML;
     {
         $config = $this->config["params"];
 
+        if(empty($config))
+        {
+            return;
+        }
+
         if(($context != 'com_content.article' && $context != 'com_content.category' && $context != 'com_tags.tag' && $context != 'com_content.featured')
             || ($context == 'com_content.category' && !$config->allow_in_category)
             || ($context == 'com_tags.tag' && !$config->allow_in_tags)
@@ -565,6 +570,12 @@ HTML;
     private function setContentTypes()
     {
         $params = $this->config['params'];
+
+        if(!isset($params->content_types))
+        {
+            return;
+        }
+
         $types = $params->content_types;
         if(!is_array($types) || count($types) == 0)
         {
@@ -695,6 +706,73 @@ HTML;
         return false;
     }
 
+    /** Проверка заполненности обязательных полей перед сохранением
+     * @param $context
+     * @param $table
+     * @param bool $isNew
+     * @return bool
+     * @throws Exception
+     */
+    public function onExtensionBeforeSave($context, $table, $isNew=false)
+    {
+        if($context !== 'com_plugins.plugin' || $table->element != 'minicck')
+        {
+            return true;
+        }
+
+        $params = json_decode($table->params);
+        $customfields = $params->customfields;
+        $content_types = $params->content_types;
+
+        if(!is_array($customfields) || count($customfields) == 0)
+        {
+            throw new Exception('Custom Fields is Empty');
+        }
+
+        if(!is_array($content_types) || count($content_types) == 0)
+        {
+            throw new Exception('Content Types is Empty');
+        }
+
+        $app = JFactory::getApplication();
+
+        //формируем новые и удаленные поля
+        foreach($customfields as $v)
+        {
+            if(empty($v->name))
+            {
+                throw new Exception('Custom Field Name is Empty');
+            }
+
+            if(empty($v->type))
+            {
+                throw new Exception('Custom Field "'.$v->name.'" Type is Empty');
+            }
+
+            if(empty($v->title))
+            {
+                $app->enqueueMessage(JText::_('Custom Field "'.$v->name.'" Title is Empty'), 'error');
+                return true;
+            }
+        }
+
+        //формируем новые и удаленные поля
+        foreach($content_types as $v)
+        {
+            if(empty($v->name))
+            {
+                throw new Exception('Content Type Name is Empty');
+            }
+
+            if(empty($v->title))
+            {
+                $app->enqueueMessage(JText::_('Content Type "'.$v->name.'" Title is Empty'), 'error');
+                return true;
+            }
+        }
+        return true;
+    }
+
     /** Создание новых и удаление удаленных полей из таблицы
      * @param $context
      * @param $table
@@ -715,7 +793,6 @@ HTML;
         if(!is_array($customfields) || count($customfields) == 0)
         {
             throw new Exception('Custom Fields is Empty');
-            return false;
         }
 
         $newColumn = $oldColumn = array();
