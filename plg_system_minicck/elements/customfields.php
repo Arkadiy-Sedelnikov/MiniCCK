@@ -126,7 +126,8 @@ HTML;
 
                     foreach($extraOptionsSettings[$custom->type] as $extraparam)
                     {
-                        $value = !empty($custom->extraparams->$extraparam['name']) ? $custom->extraparams->$extraparam['name'] : '';
+                        $default = isset($extraparam['value']) ? $extraparam['value'] : '';
+                        $value = isset($custom->extraparams->$extraparam['name']) ? $custom->extraparams->$extraparam['name'] : $default;
 
                         $attr = '';
                         if(isset($extraparam['attr']) && is_array($extraparam['attr']) && count($extraparam['attr']))
