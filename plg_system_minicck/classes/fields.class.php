@@ -7,7 +7,7 @@
  */
 class MiniCCKFields
 {
-    public static function loadTemplate($fieldName, $data, $type='default')
+    public static function loadTemplate($fieldName, $data, $type='default', $params=null)
     {
         //переопределение шаблона поля
         $template = JFactory::getApplication()->getTemplate();
