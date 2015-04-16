@@ -23,6 +23,7 @@ class JFormFieldMcselect extends MiniCCKFields
 
     static function getTitle()
     {
+        self::loadLang('mcselect');
         return JText::_('PLG_MINICCK_SELECT');
     }
 
@@ -41,12 +42,27 @@ class JFormFieldMcselect extends MiniCCKFields
                 $options[] = JHtml::_('select.option', $key,     JText::_($val));
             }
         }
-        $fieldname	= $this->name;
-        $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
+
+        $params = $field['extraparams'];
+        $multi = '';
+        if(!empty($params->multi))
+        {
+            $value = explode(',', $value);
+            $multi = ' multiple="multiple"';
+            if(!empty($params->rows))
+            {
+                $multi .= ' rows="'.$params->rows.'"';
+            }
+        }
+
+
+        $fieldname	= (empty($params->multi)) ? $this->name : $this->name.'[]';
+        $id = str_replace(array('][',']','['), array('_', '', '_'), $this->name);
+
         $html = '<div class="control-group '.$name.'"'.$hidden.'>';
         $html .= '<label for="'.$id.'" class="control-label" title="" >'.$label.'</label>';
         $html .= '<div class="controls">';
-        $html .= JHTML::_('select.genericlist', $options, $fieldname, 'id="'.$id.'"'.$disabled.' class="type inputbox '.$name.'"', 'value', 'text', $value);
+        $html .= JHTML::_('select.genericlist', $options, $fieldname, 'id="'.$id.'"'.$disabled.$multi.' class="type inputbox '.$name.'"', 'value', 'text', $value);
         $html .= '</div>';
         $html .= '</div>';
         return $html;
@@ -54,11 +70,35 @@ class JFormFieldMcselect extends MiniCCKFields
 
     static function  getValue($field, $value)
     {
+        $params = $field['extraparams'];
+
+        if(!empty($params->multi))
+        {
+            $value = explode(',', $value);
+            if(is_array($value) && count($value)>0){
+                $tmp = array();
+                foreach($value as $v){
+                    $tmp[] = $field['params'][$v];
+                }
+                $data = $tmp;
+            }
+            else if(!is_array($value) && !empty($value)){
+                $data = (!empty($field['params'][$value])) ? array($field['params'][$value]) : array($value);
+            }
+            else{
+                $data = array($value);
+            }
+        }
+        else
+        {
+            $data = !empty($field['params'][$value]) ? $field['params'][$value] : null;
+        }
+
         $return = '';
 
-        if(!empty($field['params'][$value]))
+        if(!empty($data))
         {
-            $return = self::loadTemplate('mcselect', $field['params'][$value]);
+            $return = self::loadTemplate('mcselect', $data, 'default', $params);
         }
 
         return $return;
@@ -93,6 +133,57 @@ class JFormFieldMcselect extends MiniCCKFields
 
     static function buildQuery(&$query, $fieldName, $value, $type = 'eq')
     {
-        parent::buildQuery($query, $fieldName, $value, 'eq');
+        parent::buildQuery($query, $fieldName, $value, 'find_in_set_multi');
+    }
+
+    /** Добавляем дополнительные параметры в настройки полей
+     * @return string
+     */
+    static function extraOptions($json = false)
+    {
+        $extraOptions = array(
+            array(
+                'title' => JText::_('PLG_MINICCK_MCSELECT_MULTI'),
+                'name' => 'multi',
+                'type' => 'select',
+                'value' => '0',
+                'options' => array(
+                    '1' => JText::_('JYES'),
+                    '0' => JText::_('JNO')
+                ),
+                'attr' => array(
+                    'class' => 'inputbox'
+                )
+            ),
+            array(
+                'title' => JText::_('PLG_MINICCK_MCSELECT_ROWS'),
+                'name' => 'rows',
+                'type' => 'text',
+                'value' => '1',
+                'attr' => array(
+                    'class' => 'inputbox'
+                )
+            ),
+            array(
+                'title' => JText::_('PLG_MINICCK_MCSELECT_SEPARATOR'),
+                'name' => 'separator',
+                'type' => 'text',
+                'value' => ' | ',
+                'attr' => array(
+                    'class' => 'inputbox'
+                )
+            ),
+        );
+
+        return $json ? json_encode($extraOptions) : $extraOptions;
+    }
+
+    public static function prepareToSaveValue($value)
+    {
+        if(is_array($value))
+        {
+            $value = implode(',', $value);
+        }
+        return $value;
     }
 }

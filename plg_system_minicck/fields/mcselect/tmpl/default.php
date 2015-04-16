@@ -6,6 +6,11 @@
  */
 
 defined('_JEXEC') or die;
+$separator = !empty($params->separator) ? $params->separator : ' | ';
 ?>
 
-<?php echo $data; ?>
+<?php if(is_array($data)) : ?>
+    <?php echo implode($separator, $data); ?>
+<?php else : ?>
+    <?php echo $data; ?>
+<?php endif; ?>
