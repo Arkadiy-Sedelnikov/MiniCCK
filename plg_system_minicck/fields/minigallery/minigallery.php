@@ -44,16 +44,11 @@ class JFormFieldMinigallery extends MiniCCKFields
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = json_decode($this->value, true);
-
         $field = plgSystemMinicck::getCustomField($name);
         $directory = trim($field["params"]);
-        $directory = (!empty($directory)) ? $directory : '/images';
-        if(substr($directory, 0, 1) !== '/') $directory = '/'.$directory;
-        if(!is_dir(JPATH_ROOT.$directory))$directory = '/images/';
-        if(substr($directory, -1) !== '/') $directory = $directory.'/';
-
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
+        
         $html = '
             <div class="control-group '.$name.'"'.$hidden.'>
                 <label for="'.$id.'_image" class="control-label" title="" >'.$label.'</label>

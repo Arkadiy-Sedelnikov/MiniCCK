@@ -35,7 +35,7 @@ function minigalleryADDField(element, $id, $fieldname, $name, $directory) {
     jQuery('div.controls', parent).append(div);
 
     SqueezeBox.initialize({});
-    SqueezeBox.assign(jQuery('a.modal:last').get(), {
+    SqueezeBox.assign(jQuery('a.modal:last', parent).get(), {
         parse: 'rel'
     });
 }
