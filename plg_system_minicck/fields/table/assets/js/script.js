@@ -15,10 +15,13 @@ function tableADDRow(element, $id, $fieldname, $name, countColumns) {
     var rowId = 'tr_'+$id+'_'+newRowNum;
     row.attr('id', rowId);
 
-    for(i=0;i<countColumns;i++){
-        input = jQuery('<input/>')
+    for(i=0;i<countColumns;i++)
+    {
+        input = jQuery('<textarea/>')
             .attr('name', $fieldname+'['+newRowNum+']'+'['+i+']')
-            .val('');
+            .attr('cols', minicckFieldTableSettings.cols)
+            .attr('rows', minicckFieldTableSettings.rows);
+
         td = jQuery('<td/>').append(input).appendTo(row);
     }
     td = jQuery('<td/>')

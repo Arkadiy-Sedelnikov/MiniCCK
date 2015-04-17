@@ -29,23 +29,32 @@ class JFormFieldTable extends MiniCCKFields
 
     function getInput()
     {
-        if(!defined('PLG_MINICCK_TABLE_LOADED')){
-            define('PLG_MINICCK_TABLE_LOADED', 1);
-            JHtml::_('behavior.modal');
-            JHtml::_('behavior.framework');
-            JFactory::getDocument()->addScript(JUri::root().'plugins/system/minicck/fields/table/assets/js/script.js');
-        }
-
-        self::loadLang('table');
-
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
         $type = $this->attributes['type'];
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = json_decode($this->value, true);
-
         $field = plgSystemMinicck::getCustomField($name);
+        $params = $field['extraparams'];
+
+        if(!defined('PLG_MINICCK_TABLE_LOADED')){
+            define('PLG_MINICCK_TABLE_LOADED', 1);
+            JHtml::_('behavior.modal');
+            JHtml::_('behavior.framework');
+            $doc = JFactory::getDocument();
+            $doc->addScript(JUri::root().'plugins/system/minicck/fields/table/assets/js/script.js');
+            $doc->addScriptDeclaration('
+            var minicckFieldTableSettings = {
+                cols: '.(int)$params->cols.',
+                rows: '.(int)$params->rows.',
+            };
+            ');
+
+        }
+
+        self::loadLang('table');
+
 
 
         $headers = explode("\n", $field["params"]);
@@ -83,7 +92,7 @@ class JFormFieldTable extends MiniCCKFields
             {
                 $html .= '<tr id="tr_'.$id.'_'.$k.'">';
                 for($i=0;$i<$countHeaders;$i++){
-                    $html .= '<td><input name="'.$fieldname.'['.$k.']['.$i.']" value="'.$v[$i].'"></td>';
+                    $html .= '<td><textarea name="'.$fieldname.'['.$k.']['.$i.']" cols="'.$params->cols.'" rows="'.$params->rows.'">'.$v[$i].'</textarea></td>';
                 }
                 $html .= '<td><a href="#" class="btn" onclick="tableDeleteRow(this); return false;" title="Delete"><i class="icon-remove"></i></a></td>';
                 $html .= '</tr>';
@@ -126,10 +135,24 @@ class JFormFieldTable extends MiniCCKFields
 
         if(count($value)>0)
         {
-            foreach($value as $k => $v)
+            $newValue = array();
+            $i=0;
+            foreach($value as $v)
             {
-                $value[$k] = htmlspecialchars($v);
+                if(is_array($v))
+                {
+                    foreach($v as $key => $val)
+                    {
+                        $newValue[$i][$key] = htmlspecialchars($val);
+                    }
+                }
+                else
+                {
+                    $newValue[$i] = htmlspecialchars($v);
+                }
+                $i++;
             }
+            $value = $newValue;
         }
 
         return $value;
@@ -146,6 +169,24 @@ class JFormFieldTable extends MiniCCKFields
                 'name' => 'class',
                 'type' => 'text',
                 'value' => 'table',
+                'attr' => array(
+                    'class' => 'inputbox'
+                )
+            ),
+            array(
+                'title' => JText::_('PLG_MINICCK_TABLE_ROWS'),
+                'name' => 'rows',
+                'type' => 'text',
+                'value' => '1',
+                'attr' => array(
+                    'class' => 'inputbox'
+                )
+            ),
+            array(
+                'title' => JText::_('PLG_MINICCK_TABLE_COLS'),
+                'name' => 'cols',
+                'type' => 'text',
+                'value' => '50',
                 'attr' => array(
                     'class' => 'inputbox'
                 )
