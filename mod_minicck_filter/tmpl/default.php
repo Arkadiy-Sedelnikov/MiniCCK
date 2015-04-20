@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 ?>
 
 <form id="mod-finder-searchform" action="<?php echo $action; ?>" method="post" class="form-search">
-	<div class="minicck_filter">
+	<div class="minicck_filter<?php echo $moduleclass_sfx; ?>">
         <?php foreach($fields as $v) : ?>
             <?php echo $v; ?>
             <div style="clear: both;"></div>

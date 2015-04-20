@@ -22,6 +22,7 @@ $id = $input->getInt('id', 0);
 $minicckfilter = $input->get('minicckfilter', array(), 'array');
 
 $allowedCats = $params->get('categories', array());
+$moduleclass_sfx = $params->get('moduleclass_sfx', '');
 
 if($view == 'category')
 {
