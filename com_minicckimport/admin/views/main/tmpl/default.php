@@ -12,39 +12,53 @@ $userId = $user->get( 'id' );
 
     Joomla.submitbutton = function(task)
     {
-        if(!jQuery("#type_id").val()) {
+        var type_id = jQuery("#type_id");
+        var maincat = jQuery("#maincat");
+        var field_separator = jQuery("#field_separator");
+        var enclosure_char = jQuery("#enclosure_char");
+        var num_headers = jQuery("#num_headers");
+        var num_content = jQuery("#num_content");
+        var csvfile = jQuery("#csvfile");
+
+        if(!type_id.val()) {
             alert(<?php echo JText::_('COM_MINICCKIMPORT_SELECT_TYPE'); ?>);
-            jQuery("#type_id").focus();
+            type_id.focus();
             return;
         }
-        if( jQuery("#maincat").val() <=0 && !jQuery("maincat_col").checked ) {
+
+        if( maincat.val() <=0 && !jQuery("#maincat_col").prop('checked') ) {
             alert(<?php echo JText::_('COM_MINICCKIMPORT_SELECT_CAT'); ?>);
-            jQuery("#maincat").focus();
+            maincat.focus();
             return;
         }
-        if(jQuery("#field_separator").val()=="") {
+
+        if(field_separator.val()=="") {
             alert(<?php echo JText::_('COM_MINICCKIMPORT_SELECT_DELIMITER'); ?>);
-            jQuery("#field_separator").focus();
+            field_separator.focus();
             return;
         }
-        if(jQuery("#enclosure_char").val()=="") {
+
+        if(enclosure_char.val()=="") {
             alert(<?php echo JText::_('COM_MINICCKIMPORT_SELECT_ENCLOSURE'); ?>);
-            jQuery("#enclosure_char").focus();
+            enclosure_char.focus();
             return;
         }
-        if(jQuery("#num_headers").val()=="") {
+
+        if(num_headers.val()=="") {
             alert(<?php echo JText::_('COM_MINICCKIMPORT_SELECT_NUM_HEADERS'); ?>);
-            jQuery("#num_headers").focus();
+            num_headers.focus();
             return;
         }
-        if(jQuery("#num_content").val()=="") {
+
+        if(num_content.val()=="") {
             alert(<?php echo JText::_('COM_MINICCKIMPORT_SELECT_NUM_CONTENT'); ?>);
-            jQuery("#num_content").focus();
+            num_content.focus();
             return;
         }
-        if(jQuery("#csvfile").val()=="") {
+
+        if(csvfile.val()=="") {
             alert(<?php echo JText::_('COM_MINICCKIMPORT_SELECT_FILE'); ?>);
-            jQuery("#csvfile").focus();
+            csvfile.focus();
             return;
         }
 

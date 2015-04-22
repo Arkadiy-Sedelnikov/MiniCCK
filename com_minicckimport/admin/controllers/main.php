@@ -49,7 +49,7 @@ class MinicckimportControllerMain extends JControllerLegacy
 
         $input = JFactory::getApplication()->input;
 
-        $language = $input->getCmd('language', '');
+        $language = $input->getString('language', '');
         $type_id = $input->getCmd('type_id', 0);
         $maincat = $input->getInt('maincat', 0);
         $second_cat = $input->get('second_cat', array(), 'array');
@@ -68,7 +68,8 @@ class MinicckimportControllerMain extends JControllerLegacy
             return;
         }
 
-        if (!$maincat && !$maincat_col) {
+        if (!$maincat && !$maincat_col)
+        {
             // Check for the required main category
             $this->setRedirect($link, JText::_('COM_MINICCKIMPORT_SELECT_CAT'));
             return;
@@ -257,8 +258,8 @@ class MinicckimportControllerMain extends JControllerLegacy
             {
                 $col_id = $headers[$col_name];
                 $dataCell = $fields[$col_id];
-
-                $data[$fieldname] = $this->encodeContentFieldData($fieldname, $dataCell);
+                $dataCell = $this->encodeContentFieldData($fieldname, $dataCell);
+                $data[$fieldname] = (!empty($data[$fieldname]) && empty($dataCell)) ? $data[$fieldname] : $dataCell;
             }
 
             //пропускаем запись если заголовок пустой

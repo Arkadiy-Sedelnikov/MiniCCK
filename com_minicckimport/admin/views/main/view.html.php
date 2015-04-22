@@ -15,7 +15,7 @@ class MinicckimportViewMain extends JViewLegacy
         $this->langSelect = $this->get('LangSelect');
         $this->typeSelect = $this->get('TypeSelect');
         $catOptions = JHtmlCategory::options('com_content');
-        $this->firstCat = JHTML::_('select.genericlist', $catOptions, 'first_cat', 'class="inputbox" ', 'value', 'text', $params->get('dafault_cat', ''));
+        $this->firstCat = JHTML::_('select.genericlist', $catOptions, 'maincat', 'class="inputbox" ', 'value', 'text', $params->get('dafault_cat', ''));
         $this->secondCat = JHTML::_('select.genericlist', $catOptions, 'second_cat[]', 'class="inputbox" multiple="multiple" ', 'value', 'text', $params->get('dafault_second_cat', ''));
         $this->field_delimiter = $params->get('field_delimiter', '^');
         $this->text_delimiter = $params->get('text_delimiter', '~');
