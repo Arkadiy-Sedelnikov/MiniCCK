@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<extension type="component" version="1.6.0" method="upgrade">
+    <name>com_minicckimport</name>
+    <author>Arkadiy</author>
+    <authorEmail>a.sedelnikov@gmail.com</authorEmail>
+    <authorUrl>argens.ru</authorUrl>
+    <copyright>Copyright (c)2015 Arkadiy Sedelnikov</copyright>
+    <license>GNU GPLv3 - http://www.gnu.org/licenses/gpl.html</license>
+    <version>1.0</version>
+    <description>COM_MINICCKIMPORT_DESC</description>
+    <creationDate>17 April 2015</creationDate>
+    <administration>
+        <menu>COM_MINICCKIMPORT</menu>
+        <files folder="admin">
+            <folder>controllers</folder>
+            <folder>helpers</folder>
+            <folder>language</folder>
+            <folder>lib</folder>
+            <folder>models</folder>
+            <folder>views</folder>
+            <filename>access.xml</filename>
+            <filename>config.xml</filename>
+            <filename>controller.php</filename>
+            <filename>index.html</filename>
+            <filename>minicckimport.php</filename>
+        </files>
+        <languages folder="admin">
+            <language tag="en-GB">language/en-GB/en-GB.com_minicckimport.ini</language>
+            <language tag="ru-RU">language/ru-RU/ru-RU.com_minicckimport.ini</language>
+            <language tag="en-GB">language/en-GB/en-GB.com_minicckimport.sys.ini</language>
+            <language tag="ru-RU">language/ru-RU/ru-RU.com_minicckimport.sys.ini</language>
+        </languages>
+    </administration>
+</extension>
