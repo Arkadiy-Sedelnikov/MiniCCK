@@ -34,6 +34,7 @@ class JFormFieldCustomfields extends JFormField
 
 
         $scriptArr = $extraOptionsSettings = array();
+
         foreach($fields as $field)
         {
             $className = $htmlClass->loadElement(array('type' => $field));
@@ -65,14 +66,16 @@ class JFormFieldCustomfields extends JFormField
 
         $html = <<<HTML
     <input type="button" class="btn btn-small btn-success del_button" value="$fadd" onclick="fieldAdd()" />
+    <br/>
+    <br/>
     <fieldset class="panelform">
 HTML;
-
+        $html .= JHtml::_('bootstrap.startAccordion', 'customfields', array('active' => 'collapse0'));
 
         if (empty($pluginParams->customfields))
         {
             $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][0][type]', 'class="type inputbox" onchange="loadExtraFields(this, 0)"', 'value', 'text');
-
+            $html .= JHtml::_('bootstrap.addSlide', 'customfields', 'field_0', 'collapse0');
             $html .= <<<HTML
 <div id="field_0" class="field_contayner">
 <hr style="clear:both"/>
@@ -113,6 +116,7 @@ HTML;
 <input type="button" class="btn btn-danger del-button" value="$fdel" onclick="fieldDel(\'field_0\')">
 </div>
 HTML;
+            $html .= JHtml::_('bootstrap.endSlide');
         }
         else
         {
@@ -176,9 +180,9 @@ HTML;
                 }
 
                 $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][' . $k . '][type]', 'class="type inputbox" onchange="loadExtraFields(this, '.$k.')"', 'value', 'text', $custom->type);
+                $html .= JHtml::_('bootstrap.addSlide', 'categoryOptions', $custom->title, 'collapse' . $k);
                 $html .= <<<HTML
 <div id="field_$k" class="field_contayner">
-<hr style="clear:both"/>
 <div style="width: 50%; float: left">
 <div class="control-group">
 	<div class="control-label">
@@ -217,11 +221,14 @@ HTML;
 </div>
 HTML;
                 $k++;
+                $html .= JHtml::_('bootstrap.endSlide');
             }
         }
+        $html .= JHtml::_('bootstrap.endAccordion');
         $html .= <<<HTML
         <input type="hidden" id="numFields" value="$numFields"/>
         </fieldset>
+        <input type="button" class="btn btn-small btn-success del_button" value="$fadd" onclick="fieldAdd()" />
 HTML;
         return $html;
     }

@@ -11,8 +11,15 @@ function fieldAdd()
         fieldName ++;
     }
 
-    var field 	 = jQuery('div.field_contayner:first');
+    var field 	 = jQuery('div.accordion-group:first');
     var newField = field.clone();
+
+    jQuery('.accordion-heading a', newField)
+        .text('New field')
+        .attr('href','#collapse'+numFields);
+
+    jQuery('.accordion-body', newField)
+        .attr('id', 'collapse'+numFields);
 
     jQuery('input.name', newField)
         .val('field_'+(fieldName))
@@ -44,15 +51,19 @@ function fieldAdd()
     jQuery('input.del-button', newField)
         .attr('onclick', 'fieldDel("field_'+numFields+'")');
 
-    newField.attr('id', 'field_'+numFields);
+    jQuery('div.field_contayner', newField)
+        .attr('id', 'field_'+numFields);
 
-    jQuery('#numFields').before(newField);
+    jQuery('#customfields').append(newField);
 
     jQuery('select.type', '#field_'+numFields)
         .chosen({
             disable_search_threshold : 10,
             allow_single_deselect : true
         });
+    
+    jQuery('a.accordion-toggle',newField).click();
+
     window.location.hash = 'field_'+numFields;
     anchor();
 }
@@ -62,7 +73,7 @@ function fieldDel(id)
 {
     var numFields = jQuery('.field_contayner').length;
     if(numFields > 1){
-        jQuery('#'+id).remove();
+        jQuery('#'+id).parents('.accordion-group').remove();
     }
 }
 
