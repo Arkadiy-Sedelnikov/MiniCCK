@@ -119,6 +119,7 @@ function contentTypeAdd(){
     jQuery('.chzn-container', newContentType).remove();
 
     var select = jQuery('select.content_type_tmpl', newContentType);
+
     jQuery('option:selected', select).removeAttr('selected');
     select.attr('name', 'jform[params][content_types]['+numFields+'][content_tmpl]')
         .show()
@@ -141,7 +142,35 @@ function contentTypeAdd(){
             var cb = jQuery(this);
             var name_suffix = cb.attr('id').split('-');
             cb.removeAttr('checked')
-                .attr('name', 'jform[params][content_types]['+numFields+'][fields]['+name_suffix[0]+']['+name_suffix[1]+']');
+                .attr('name', 'jform[params][content_types]['+numFields+'][fields]['+name_suffix[0]+']['+name_suffix[2]+']');
+        }
+    );
+
+    jQuery('select.field_article_type_tmpl', newContentType).each(function()
+        {
+            var select = jQuery(this);
+            var name_suffix = select.attr('data-field');
+            jQuery('option:selected', select).removeAttr('selected');
+            select.attr('name', 'jform[params][content_types]['+numFields+'][fields]['+name_suffix+'][content_tmpl]')
+                .show()
+                .chosen({
+                    disable_search_threshold : 10,
+                    allow_single_deselect : true
+                })
+        }
+    );
+
+    jQuery('select.field_category_type_tmpl', newContentType).each(function()
+        {
+            var select = jQuery(this);
+            var name_suffix = select.attr('data-field');
+            jQuery('option:selected', select).removeAttr('selected');
+            select.attr('name', 'jform[params][content_types]['+numFields+'][fields]['+name_suffix+'][category_tmpl]')
+                .show()
+                .chosen({
+                    disable_search_threshold : 10,
+                    allow_single_deselect : true
+                })
         }
     );
 

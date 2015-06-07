@@ -7,16 +7,21 @@
  */
 class MiniCCKFields
 {
-    public static function loadTemplate($fieldName, $data, $type='default', $params=null)
+    public static function loadTemplate($field, $data, $type='default', $params=null)
     {
-        //переопределение шаблона поля
         $template = JFactory::getApplication()->getTemplate();
+        $fieldTemplate = ($type == 'filter') ? 'filter.php' : $field['template'];
+        $tmpl = JPATH_ROOT. '/templates/'.$template.'/html/plg_system_minicck/fields/'.$field['type'].'/'.$fieldTemplate;
 
-        $tmpl = JPATH_ROOT. '/templates/'.$template.'/html/plg_system_minicck/fields/'.$fieldName.'/'.$type.'.php';
-
+        //переопределение шаблона поля
         if(!JFile::exists($tmpl))
         {
-            $tmpl = JPATH_ROOT.'/plugins/system/minicck/fields/'.$fieldName.'/tmpl/'.$type.'.php';
+            $tmpl = JPATH_ROOT.'/plugins/system/minicck/fields/'.$field['type'].'/tmpl/'.$fieldTemplate;
+        }
+
+        if(!is_file($tmpl))
+        {
+            return '';
         }
 
         //подключение шаблона
@@ -78,9 +83,5 @@ class MiniCCKFields
                     $query->where($db->quoteName($fieldName).' = '.$db->quote($value));
                 break;
         }
-
-
-
-
     }
 }

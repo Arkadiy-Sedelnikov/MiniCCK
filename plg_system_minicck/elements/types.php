@@ -16,11 +16,13 @@ class JFormFieldTypes extends JFormField
     var $type = 'Types';
     var $fields;
     var $pluginParams;
+    var $fieldTemplates;
 
     function __construct(){
         $plugin = JPluginHelper::getPlugin('system', 'minicck');
         $this->pluginParams = (!empty($plugin->params)) ? json_decode($plugin->params) : new stdClass();
         $this->fields = (!empty($this->pluginParams->customfields)) ? $this->pluginParams->customfields : array();
+        $this->fieldTemplates = $this->getFieldTemplates();
         parent::__construct();
     }
     function getInput()
@@ -57,7 +59,8 @@ HTML;
                 $k = 0;
                 foreach ($this->pluginParams->content_types as $type)
                 {
-                    $html .= JHtml::_('bootstrap.addSlide', 'minicckTypes1', $type->title, 'collapseType'.$k);
+                    $title = (!empty($type->title)) ? $type->title : 'Empty Title';
+                    $html .= JHtml::_('bootstrap.addSlide', 'minicckTypes1', $title, 'collapseType'.$k);
                     $html .= $this->loadType($k, $type);
                     $html .= JHtml::_('bootstrap.endSlide');
                     $k++;
@@ -148,7 +151,7 @@ HTML;
         	</div>
         	<div class="controls">$tplCatSelect</div>
         </div>
-        <div style="clear: both;"></div>
+        <hr style="clear: both"/>
 HTML;
         if(count($this->fields))
         {   $i = 0;
@@ -156,13 +159,11 @@ HTML;
             {
                 $i++;
                 $html .= $this->loadField($id, $type, $field);
-                if($i % 2 == 0){
-                    $html .= '<hr style="clear: both"/>';
-                }
+                $html .= '<hr style="clear: both"/>';
             }
         }
         $html .= <<<HTML
-        <hr style="clear: both"/>
+
         <input
             type="button"
             class="btn btn-danger del-button"
@@ -181,32 +182,60 @@ HTML;
         $checkedContent = (!empty($type->fields->$fieldName->content)) ? ' checked="checked"' : '';
         $cat = JText::_('PLG_MINICCK_CAT');
         $content = JText::_('PLG_MINICCK_CONTENT');
+        $tplContent = JText::_('PLG_MINICCK_TYPE_CONTENT_TPL');
+        $tplCat = JText::_('PLG_MINICCK_TYPE_CATEGORY_TPL');
+        $fname = "jform[params][content_types][$typeId][fields][$fieldName]";
+        $selectedCatTmpl = (!empty($type->fields->$fieldName->category_tmpl)) ? $type->fields->$fieldName->category_tmpl : '';
+        $selectedArticleTmpl = (!empty($type->fields->$fieldName->content_tmpl)) ? $type->fields->$fieldName->content_tmpl : '';
+        $catTmpl = JHTML::_('select.genericlist', $this->fieldTemplates[$field->type], $fname.'[category_tmpl]', 'data-field="'.$fieldName.'" class="field_category_type_tmpl inputbox"', 'value', 'text', $selectedCatTmpl);
+        $itemTmpl = JHTML::_('select.genericlist', $this->fieldTemplates[$field->type], $fname.'[content_tmpl]', 'data-field="'.$fieldName.'" class="field_article_type_tmpl inputbox"', 'value', 'text', $selectedArticleTmpl);
+
         $html = <<<HTML
-        <div class="control-group" style="width: 50%; float: left;">
+        <div class="control-group">
         	<div class="control-label">
                 <label style="font-weight: bold;">{$field->title}</label>
         	</div>
-        	<div class="controls">
-        	<label for="$fieldName-$typeId-category" style="float: left;">$cat
-                <input
-                    type="checkbox"
-                    id="$fieldName-$typeId-category"
-                    name="jform[params][content_types][$typeId][fields][$fieldName][category]"
-                    value="1"
-                    class="field_name inputbox"
-                    aria-invalid="false"
-                    $checkedCat
-                    /></label>
-        	<label for="$fieldName-$typeId-content" style="float: left;">$content
-                <input
-                    type="checkbox"
-                    id="$fieldName-$typeId-content"
-                    name="jform[params][content_types][$typeId][fields][$fieldName][content]"
-                    value="1"
-                    class="field_name inputbox"
-                    aria-invalid="false"
-                    $checkedContent
-                    /></label>
+        	<div class="controls row">
+        	    <div class="span1">
+                    <label for="$fieldName-$typeId-category">$cat</label>
+                </div>
+                <div class="span1">
+                    <input
+                        type="checkbox"
+                        id="$fieldName-$typeId-category"
+                        name="{$fname}[category]"
+                        value="1"
+                        class="field_name inputbox"
+                        aria-invalid="false"
+                        $checkedCat
+                        />
+                </div>
+        	    <div class="span1">
+        	    <label for="$fieldName-$typeId-content">$content</label>
+                </div>
+        	    <div class="span1">
+                    <input
+                        type="checkbox"
+                        id="$fieldName-$typeId-content"
+                        name="{$fname}[content]"
+                        value="1"
+                        class="field_name inputbox"
+                        aria-invalid="false"
+                        $checkedContent
+                        />
+                </div>
+        	    <div class="span2">
+        	    <label for="$fieldName-$typeId-content1" style="width: 100%; max-width: 100%;">$tplContent</label>
+                </div>
+        	    <div class="span2">
+                    $itemTmpl
+                </div>
+        	    <div class="span2">
+        	        <label for="$fieldName-$typeId-content1" style="width: 100%; max-width: 100%;">$tplCat</label>
+                </div>
+                <div class="span2">
+                    $catTmpl
+                </div>
         	</div>
         </div>
 HTML;
@@ -227,5 +256,31 @@ HTML;
             }
         }
         return $options;
+    }
+
+    function getFieldTemplates()
+    {
+        $return = array();
+        $path = JPATH_ROOT . '/plugins/system/minicck/fields';
+        $folders = JFolder::folders($path);
+
+        if(is_array($folders) && count($folders))
+        {
+            foreach($folders as $v)
+            {
+                $options = array();
+                $files = JFolder::files($path.'/'.$v.'/tmpl', '.', false, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX', 'index.html'));
+                if (is_array($files) && count($files))
+                {
+                    foreach ($files as $file)
+                    {
+                        $options[] = JHtml::_('select.option', $file, $file);
+                    }
+                }
+                $return[$v] = $options;
+            }
+        }
+
+        return $return;
     }
 }

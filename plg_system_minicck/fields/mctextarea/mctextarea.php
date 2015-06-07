@@ -48,7 +48,7 @@ class JFormFieldMctextarea extends MiniCCKFields
     }
 
     static function  getValue($field, $value){
-        $return = self::loadTemplate('mctext', htmlspecialchars_decode($value));
+        $return = self::loadTemplate($field, htmlspecialchars_decode($value));
         return $return;
     }
 
@@ -62,7 +62,7 @@ class JFormFieldMctextarea extends MiniCCKFields
         $values = JFactory::getApplication()->getUserState('cat_'.$category_id.'.minicckfilter', array());
         $field['params'] = self::prepareParams($field['params']);
         $field['selectedValues'] = isset($values[$field['name']]) ? $values[$field['name']] : '';
-        $return = self::loadTemplate('mctextarea', $field, 'filter');
+        $return = self::loadTemplate($field, $field, 'filter');
         return $return;
     }
 

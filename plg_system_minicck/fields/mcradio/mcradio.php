@@ -59,7 +59,7 @@ class JFormFieldMcradio extends MiniCCKFields
 
         if(!empty($field['params'][$value]))
         {
-            $return = self::loadTemplate('mcradio', $field['params'][$value]);
+            $return = self::loadTemplate($field, $field['params'][$value]);
         }
 
         return $return;
@@ -88,7 +88,7 @@ class JFormFieldMcradio extends MiniCCKFields
         $values = JFactory::getApplication()->getUserState('cat_'.$category_id.'.minicckfilter', array());
         $field['params'] = self::prepareParams($field['params']);
         $field['selectedValues'] = isset($values[$field['name']]) ? $values[$field['name']] : '';
-        $return = self::loadTemplate('mcradio', $field, 'filter');
+        $return = self::loadTemplate($field, $field, 'filter');
         return $return;
     }
 

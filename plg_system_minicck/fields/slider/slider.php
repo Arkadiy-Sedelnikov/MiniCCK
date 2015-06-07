@@ -119,7 +119,7 @@ class JFormFieldSlider extends MiniCCKFields
         $params->management = (!empty($params->management)) ? 'true' : 'false';
         $params->rootUri = JUri::root();
 
-        $return = self::loadTemplate('slider', array('value' => $value, 'extraparams' => $params));
+        $return = self::loadTemplate($field, array('value' => $value, 'extraparams' => $params));
         return $return;
     }
 

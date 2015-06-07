@@ -77,8 +77,10 @@ class JFormFieldMcselect extends MiniCCKFields
             $value = explode(',', $value);
             if(is_array($value) && count($value)>0){
                 $tmp = array();
-                foreach($value as $v){
-                    $tmp[] = $field['params'][$v];
+                foreach($value as $v)
+                {
+                    if(isset($field['params'][$v]))
+                        $tmp[] = $field['params'][$v];
                 }
                 $data = $tmp;
             }
@@ -98,7 +100,7 @@ class JFormFieldMcselect extends MiniCCKFields
 
         if(!empty($data))
         {
-            $return = self::loadTemplate('mcselect', $data, 'default', $params);
+            $return = self::loadTemplate($field, $data, 'default', $params);
         }
 
         return $return;
@@ -127,7 +129,7 @@ class JFormFieldMcselect extends MiniCCKFields
         $values = JFactory::getApplication()->getUserState('cat_'.$category_id.'.minicckfilter', array());
         $field['params'] = self::prepareParams($field['params']);
         $field['selectedValues'] = isset($values[$field['name']]) ? $values[$field['name']] : '';
-        $return = self::loadTemplate('mcselect', $field, 'filter');
+        $return = self::loadTemplate($field, $field, 'filter');
         return $return;
     }
 

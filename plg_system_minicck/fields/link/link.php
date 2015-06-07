@@ -62,7 +62,7 @@ class JFormFieldLink extends MiniCCKFields
         $data->text = (!empty($params->text)) ? $params->text : $value;
         $data->class = (!empty($params->class)) ? ' class="'.$params->class.'"' : '';
 
-        $return = self::loadTemplate('link', $data);
+        $return = self::loadTemplate($field, $data);
         return $return;
     }
 

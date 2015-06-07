@@ -92,7 +92,7 @@ class JFormFieldMcimage extends MiniCCKFields
             $value = '/'.$value;
         }
 
-        $return = self::loadTemplate('mcimage', array('value' => $value, 'extraparams' => $field['extraparams']));
+        $return = self::loadTemplate($field, array('value' => $value, 'extraparams' => $field['extraparams']));
         return $return;
     }
 

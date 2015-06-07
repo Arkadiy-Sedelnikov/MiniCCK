@@ -69,7 +69,7 @@ class JFormFieldSubscriptions extends MiniCCKFields
         $data->text = (!empty($params->text)) ? $params->text : 'Download';
         $data->class = (!empty($params->class)) ? ' class="'.$params->class.'"' : '';
 
-        $return = self::loadTemplate('subscriptions', $data);
+        $return = self::loadTemplate($field, $data);
         return $return;
     }
 

@@ -126,7 +126,7 @@ class JFormFieldTable extends MiniCCKFields
         $params = $field['extraparams'];
         $head = explode("\n", $field['params']);
 
-        $return = self::loadTemplate('table', array('head' => $head, 'body' => $value), 'default', $params);
+        $return = self::loadTemplate($field, array('head' => $head, 'body' => $value), 'default', $params);
         return $return;
     }
 

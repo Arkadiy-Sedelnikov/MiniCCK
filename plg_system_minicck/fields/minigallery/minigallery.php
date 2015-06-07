@@ -48,7 +48,7 @@ class JFormFieldMinigallery extends MiniCCKFields
         $directory = trim($field["params"]);
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
-        
+
         $html = '
             <div class="control-group '.$name.'"'.$hidden.'>
                 <label for="'.$id.'_image" class="control-label" title="" >'.$label.'</label>
@@ -145,7 +145,7 @@ SCRIPT;
         $doc->addScript($rootUri.'plugins/system/minicck/fields/minigallery/assets/inc/mbGallery.js');
         $doc->addScriptDeclaration($script);
 
-        $return = self::loadTemplate('minigallery', array('value' => $value, 'extraparams' => $params));
+        $return = self::loadTemplate($field, array('value' => $value, 'extraparams' => $params));
         return $return;
     }
 

@@ -75,7 +75,7 @@ class JFormFieldMccheckbox extends MiniCCKFields
             $data = array($value);
         }
 
-        $return = self::loadTemplate('mccheckbox', $data);
+        $return = self::loadTemplate($field, $data);
 
         return $return;
     }
@@ -105,7 +105,7 @@ class JFormFieldMccheckbox extends MiniCCKFields
         $field['params'] = self::prepareParams($field['params']);
         $value = isset($values[$field['name']]) ? $values[$field['name']] : array();
         $field['selectedValues'] = (!is_array($value)) ? array($value) : $value;
-        $return = self::loadTemplate('mccheckbox', $field, 'filter');
+        $return = self::loadTemplate($field, $field, 'filter');
         return $return;
     }
 
