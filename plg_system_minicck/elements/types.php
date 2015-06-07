@@ -39,13 +39,15 @@ class JFormFieldTypes extends JFormField
                 class="btn btn-small btn-success del_button"
                 value="$add"
                 onclick="contentTypeAdd()"
-                />
+                /><br><br>
             <fieldset class="panelform">
 HTML;
-
+        $html .= JHtml::_('bootstrap.startAccordion', 'minicckTypes', array('active' => 'collapseType0'));
         if (empty($this->pluginParams->content_types))
         {
+            $html .= JHtml::_('bootstrap.addSlide', 'minicckTypes1', 'New Type', 'collapseType0');
             $html .= $this->loadType(0);
+            $html .= JHtml::_('bootstrap.endSlide');
         }
         else
         {
@@ -55,7 +57,9 @@ HTML;
                 $k = 0;
                 foreach ($this->pluginParams->content_types as $type)
                 {
+                    $html .= JHtml::_('bootstrap.addSlide', 'minicckTypes1', $type->title, 'collapseType'.$k);
                     $html .= $this->loadType($k, $type);
+                    $html .= JHtml::_('bootstrap.endSlide');
                     $k++;
                 }
             }
@@ -65,10 +69,18 @@ HTML;
                 $html .= $this->loadType(0, null);
             }
         }
+        $html .= JHtml::_('bootstrap.endAccordion');
         $html .= <<<HTML
         <input type="hidden" id="numTypes" value="$numTypes"/>
         </fieldset>
+        <input
+                type="button"
+                class="btn btn-small btn-success del_button"
+                value="$add"
+                onclick="contentTypeAdd()"
+                />
 HTML;
+
         return $html;
     }
 
@@ -92,7 +104,6 @@ HTML;
 
         $html = <<<HTML
         <div id="content_type_$id" class="content_type_contayner">
-        <hr style="clear:both"/>
         <div class="control-group" style="width: 50%; float: left;">
         	<div class="control-label">
                 <label>$name</label>

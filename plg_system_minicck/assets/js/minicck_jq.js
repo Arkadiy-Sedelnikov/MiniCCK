@@ -11,7 +11,7 @@ function fieldAdd()
         fieldName ++;
     }
 
-    var field 	 = jQuery('div.accordion-group:first');
+    var field 	 = jQuery('div.accordion-group:first', '#minicckCustomfields');
     var newField = field.clone();
 
     jQuery('.accordion-heading a', newField)
@@ -54,15 +54,19 @@ function fieldAdd()
     jQuery('div.field_contayner', newField)
         .attr('id', 'field_'+numFields);
 
-    jQuery('#customfields').append(newField);
+    jQuery('#minicckCustomfields').append(newField);
 
     jQuery('select.type', '#field_'+numFields)
         .chosen({
             disable_search_threshold : 10,
             allow_single_deselect : true
         });
-    
-    jQuery('a.accordion-toggle',newField).click();
+
+    if(jQuery('.accordion-body',newField).height() == 0)
+    {
+        jQuery('a.accordion-toggle',newField).click();
+    }
+
 
     window.location.hash = 'field_'+numFields;
     anchor();
@@ -88,13 +92,20 @@ function anchor(){
 
 function contentTypeAdd(){
     var numFields = jQuery('.content_type_contayner').length;
-    var type = jQuery('div.content_type_contayner:first');
+    var type = jQuery('div.accordion-group:first', '#minicckTypes');
     var newContentType = type.clone();
 
     while (jQuery('#content_type_'+numFields).length > 0)
     {
         numFields ++;
     }
+
+    jQuery('.accordion-heading a', newContentType)
+        .text('New Type')
+        .attr('href','#collapseType'+numFields);
+
+    jQuery('.accordion-body', newContentType)
+        .attr('id', 'collapseType'+numFields);
 
     jQuery('input.name', newContentType)
         .val('content_type_'+(numFields+1))
@@ -137,9 +148,15 @@ function contentTypeAdd(){
     jQuery('input.del-button', newContentType)
         .attr('onclick', 'contentTypeDel("content_type_'+numFields+'")');
 
-    newContentType.attr('id', 'content_type_'+numFields);
+    jQuery('div.content_type_contayner', newContentType)
+        .attr('id', 'content_type_'+numFields);
 
-    jQuery('#numTypes').before(newContentType);
+    jQuery('#minicckTypes').append(newContentType);
+
+    if(jQuery('.accordion-body',newContentType).height() == 0)
+    {
+        jQuery('a.accordion-toggle',newContentType).click();
+    }
 
     window.location.hash = 'content_type_'+numFields;
     anchor();
@@ -150,7 +167,7 @@ function contentTypeDel(id)
     var numFields = jQuery('.content_type_contayner').length;
     if(numFields > 1)
     {
-        jQuery('#'+id).remove();
+        jQuery('#'+id).parents('.accordion-group').remove();
     }
 }
 
