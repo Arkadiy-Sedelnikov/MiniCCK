@@ -47,7 +47,7 @@ HTML;
         $html .= JHtml::_('bootstrap.startAccordion', 'minicckTypes', array('active' => 'collapseType0'));
         if (empty($this->pluginParams->content_types))
         {
-            $html .= JHtml::_('bootstrap.addSlide', 'minicckTypes1', 'New Type', 'collapseType0');
+            $html .= JHtml::_('bootstrap.addSlide', 'minicckTypes', 'New Type', 'collapseType0');
             $html .= $this->loadType(0);
             $html .= JHtml::_('bootstrap.endSlide');
         }
@@ -60,7 +60,7 @@ HTML;
                 foreach ($this->pluginParams->content_types as $type)
                 {
                     $title = (!empty($type->title)) ? $type->title : 'Empty Title';
-                    $html .= JHtml::_('bootstrap.addSlide', 'minicckTypes1', $title, 'collapseType'.$k);
+                    $html .= JHtml::_('bootstrap.addSlide', 'minicckTypes', $title, 'collapseType'.$k);
                     $html .= $this->loadType($k, $type);
                     $html .= JHtml::_('bootstrap.endSlide');
                     $k++;
