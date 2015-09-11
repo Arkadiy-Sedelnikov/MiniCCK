@@ -590,6 +590,13 @@ HTML;
         $newParams = array();
         foreach($types as $type)
         {
+            if(count($type->fields)){
+                foreach($type->fields as $key => $field){
+                    if(!(isset($field->category) || isset($field->content))){
+                        unset($type->fields->$key);
+                    }
+                }
+            }
             $newParams[$type->name] = $type;
         }
         self::$contentTypes = $newParams;
