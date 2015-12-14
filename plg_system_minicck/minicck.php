@@ -809,13 +809,14 @@ HTML;
 
         $newColumn = $oldColumn = array();
         $db = JFactory::getDbo();
-        $table = $db->replacePrefix('#__minicck');
-        $query = $db->getQuery(true);
-        $query->select('COLUMN_NAME')
-            ->from('INFORMATION_SCHEMA.COLUMNS')
-            ->where('TABLE_NAME = '.$db->quote($table));
-        $db->setQuery($query);
-        $columns = $db->loadColumn();
+
+        try{
+            $columns = $db->getTableColumns('#__minicck');
+        }
+        catch(Exception $e){
+            throw new Exception($e->getMessage());
+            return false;
+        }
 
         if(!is_array($columns) || count($columns) == 0)
         {
@@ -826,23 +827,21 @@ HTML;
         include_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
         $minicck = MiniCCKHTML::getInstance(self::$customfields);
 
-        $flipColumns = array_flip($columns);
-
         //удаляем из массива служебные поля
-        if(isset($flipColumns['id']))
-            unset($columns[$flipColumns['id']]);
-        if(isset($flipColumns['content_id']))
-            unset($columns[$flipColumns['content_id']]);
-        if(isset($flipColumns['field_values']))
-            unset($columns[$flipColumns['field_values']]);
-        if(isset($flipColumns['content_type']))
-            unset($columns[$flipColumns['content_type']]);
+        if(isset($columns['id']))
+            unset($columns['id']);
+        if(isset($columns['content_id']))
+            unset($columns['content_id']);
+        if(isset($columns['field_values']))
+            unset($columns['field_values']);
+        if(isset($columns['content_type']))
+            unset($columns['content_type']);
 
 
         //формируем новые и удаленные поля
         foreach($customfields as $k => $v)
         {
-            if(!in_array($v->name, $columns))
+            if(!isset($columns[$v->name]))
             {
                 $tmp = array('name'=>$v->name, 'type'=>$v->type);
                 $classname = $minicck->loadElement($tmp);
@@ -850,7 +849,7 @@ HTML;
                 $newColumn[] = $tmp;
             }
             else{
-                unset($columns[$flipColumns[$v->name]]);
+                unset($columns[$v->name]);
             }
         }
 
@@ -866,9 +865,9 @@ HTML;
         //если есть удаленные поля, то удаляем
         if(count($columns))
         {
-            foreach($columns as $v)
+            foreach($columns as $k => $v)
             {
-                $db->setQuery('ALTER IGNORE TABLE `#__minicck` DROP `'.$v.'`')->execute();
+                $db->setQuery('ALTER IGNORE TABLE `#__minicck` DROP `'.$k.'`')->execute();
             }
         }
 
