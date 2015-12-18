@@ -109,41 +109,11 @@ class JFormFieldMinigallery extends MiniCCKFields
             return '';
         }
 
+        self::loadLang('minigallery');
+
         $params = $field['extraparams'];
         $params->id = $field["name"];
-        $autoplay = (!empty($params->autoplay)) ? 'true' : 'false';
-        $raster = (!empty($params->raster)) ? 'true' : 'false';
-
-        $params->width = (!empty($params->width)) ? $params->width : 620;
-        $params->heigth = (!empty($params->heigth)) ? $params->heigth : 425;
-        $skin = (!empty($params->skin)) ? $params->skin : 'black';
-        $rootUri = JUri::root();
-
-        $script = <<<SCRIPT
-        jQuery(document).ready(function ($) {
-            $('#{$params->id}_gallery').mbGallery({
-                galleryTitle:"{$field["title"]}",
-                maskBgnd:'#ccc',
-                overlayOpacity:.9,
-                containment:'{$params->id}_cont',
-                minWidth: 100,
-                minHeight: 100,
-                maxWidth: {$params->width},
-			    maxHeight: {$params->heigth},
-                cssURL:"{$rootUri}plugins/system/minicck/fields/minigallery/assets/css/",
-                skin:'$skin',
-                exifData:false,
-                addRaster:$raster,
-                slideTimer: {$params->delay}000,
-			    autoSlide: $autoplay,
-            });
-        });
-SCRIPT;
-
-        JHtml::_('behavior.framework');
-        $doc = JFactory::getDocument();
-        $doc->addScript($rootUri.'plugins/system/minicck/fields/minigallery/assets/inc/mbGallery.js');
-        $doc->addScriptDeclaration($script);
+        $params->title = $field["title"];
 
         $return = self::loadTemplate($field, array('value' => $value, 'extraparams' => $params));
         return $return;
