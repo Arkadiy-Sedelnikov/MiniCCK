@@ -27,7 +27,7 @@ class JFormFieldTable extends MiniCCKFields
         return JText::_('PLG_MINICCK_TABLE');
     }
 
-    function getInput()
+    function getInput($entityType='content')
     {
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
@@ -35,7 +35,7 @@ class JFormFieldTable extends MiniCCKFields
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = json_decode($this->value, true);
-        $field = plgSystemMinicck::getCustomField($name);
+        $field = plgSystemMinicck::getCustomField($name, $entityType);
         $params = $field['extraparams'];
 
         if(!defined('PLG_MINICCK_TABLE_LOADED')){

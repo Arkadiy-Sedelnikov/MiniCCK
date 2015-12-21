@@ -12,9 +12,9 @@ jimport('joomla.form.formfield');
 jimport('joomla.filesystem.folder');
 require_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
 
-class JFormFieldCustomfields extends JFormField
+class JFormFieldCategorycustomfields extends JFormField
 {
-    var $type = 'Customfields';
+    var $type = 'Categorycustomfields';
 
     function getInput()
     {
@@ -30,8 +30,6 @@ class JFormFieldCustomfields extends JFormField
         $typeOptions = array(JHtml::_('select.option', '', JText::_('JSELECT')));
 
         $fields = JFolder::folders(JPATH_ROOT . '/plugins/system/minicck/fields');
-
-
 
         $scriptArr = $extraOptionsSettings = array();
 
@@ -65,19 +63,19 @@ class JFormFieldCustomfields extends JFormField
         $fdel = JText::_('PLG_MINICCK_DEL_FIELD');
 
         $html = <<<HTML
-    <input type="button" class="btn btn-small btn-success del_button" value="$fadd" onclick="fieldAdd('content')" />
+    <input type="button" class="btn btn-small btn-success del_button" value="$fadd" onclick="fieldAdd('category')" />
     <br/>
     <br/>
-    <fieldset class="panelform" id="content-fieldset">
+    <fieldset class="panelform" id="category-fieldset">
 HTML;
-        $html .= JHtml::_('bootstrap.startAccordion', 'minicckCustomfields', array('active' => 'collapse0'));
+        $html .= JHtml::_('bootstrap.startAccordion', 'category_minicckCustomfields', array('active' => 'category_collapse0'));
 
-        if (empty($pluginParams->customfields))
+        if (empty($pluginParams->category_customfields))
         {
-            $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][0][type]', 'class="type inputbox" onchange="loadExtraFields(this, 0, \'content\')"', 'value', 'text');
-            $html .= JHtml::_('bootstrap.addSlide', 'minicckCustomfields', 'field_0', 'collapse0');
+            $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][category_customfields][0][type]', 'class="type inputbox" onchange="loadExtraFields(this, 0, \'category\')"', 'value', 'text');
+            $html .= JHtml::_('bootstrap.addSlide', 'category_minicckCustomfields', 'category_field_0', 'category_collapse0');
             $html .= <<<HTML
-<div id="field_0" class="field_contayner">
+<div id="category_field_0" class="field_contayner">
 <hr style="clear:both"/>
 <div style="width: 50%; float: left">
 <div class="control-group">
@@ -85,7 +83,7 @@ HTML;
         <label for="jform_params_name_0">$fname</label>
 	</div>
 	<div class="controls">
-        <input type="text" id="name_field_1" name="jform[params][customfields][0][name]" id="jform_params_name_0" value="field_1" size="20" class="name inputbox" aria-invalid="false">
+        <input type="text" id="category_name_field_1" name="jform[params][category_customfields][0][name]" id="jform_params_name_0" value="field_1" size="20" class="name inputbox" aria-invalid="false">
 	</div>
 </div>
 <div class="control-group">
@@ -93,7 +91,7 @@ HTML;
         <label for="jform_params_title_0">$ftitle</label>
 	</div>
 	<div class="controls">
-        <input type="text" name="jform[params][customfields][0][title]" id="jform_params_title_0" value="" size="20" class="title inputbox" aria-invalid="false">
+        <input type="text" name="jform[params][category_customfields][0][title]" id="jform_params_title_0" value="" size="20" class="title inputbox" aria-invalid="false">
 	</div>
 </div>
 <div class="control-group">
@@ -107,22 +105,22 @@ HTML;
         <label for="jform_params_params_0">$fparams</label>
 	</div>
 	<div class="controls">
-        <textarea name="jform[params][customfields][0][params]" id="jform_params_params_0" cols="40" rows="5" class="params inputbox"></textarea>
+        <textarea name="jform[params][category_customfields][0][params]" id="jform_params_params_0" cols="40" rows="5" class="params inputbox"></textarea>
 	</div>
 </div>
 </div>
-<div style="width: 50%; float: left" id="extra_params_0" class="extra_params"></div>
+<div style="width: 50%; float: left" id="category_extra_params_0" class="extra_params"></div>
 <div style="clear: both;"></div>
-<input type="button" class="btn btn-danger del-button" value="$fdel" onclick="fieldDel(\'field_0\')">
+<input type="button" class="btn btn-danger del-button" value="$fdel" onclick="fieldDel('category_field_0')">
 </div>
 HTML;
             $html .= JHtml::_('bootstrap.endSlide');
         }
         else
         {
-            $numFields = count($pluginParams->customfields);
+            $numFields = count($pluginParams->category_customfields);
             $k = 0;
-            foreach ($pluginParams->customfields as $custom)
+            foreach ($pluginParams->category_customfields as $custom)
             {
                 $extraparams = '';
 
@@ -145,7 +143,7 @@ HTML;
 
                         if($extraparam['type'] == 'textarea')
                         {
-                            $input = '<textarea name="jform[params][customfields]['.$k.'][extraparams]['.$extraparam['name'].']" '.$attr.'>'.$value.'</textarea>';
+                            $input = '<textarea name="jform[params][category_customfields]['.$k.'][extraparams]['.$extraparam['name'].']" '.$attr.'>'.$value.'</textarea>';
                         }
                         else if($extraparam['type'] == 'select')
                         {
@@ -160,11 +158,11 @@ HTML;
 
                             $value = ($value == '') ? 0 : $value;
 
-                            $input = JHTML::_('select.genericlist', $options, 'jform[params][customfields][' . $k . '][extraparams]['.$extraparam['name'].']', $attr, 'value', 'text', $value);
+                            $input = JHTML::_('select.genericlist', $options, 'jform[params][category_customfields][' . $k . '][extraparams]['.$extraparam['name'].']', $attr, 'value', 'text', $value);
                         }
                         else
                         {
-                            $input = '<input type="'.$extraparam['type'].'" name="jform[params][customfields]['.$k.'][extraparams]['.$extraparam['name'].']" value="'.$value.'" '.$attr.'/>';
+                            $input = '<input type="'.$extraparam['type'].'" name="jform[params][category_customfields]['.$k.'][extraparams]['.$extraparam['name'].']" value="'.$value.'" '.$attr.'/>';
                         }
                         $extraparams .= <<<HTML
                         <div class="control-group">
@@ -179,17 +177,17 @@ HTML;
                     }
                 }
 
-                $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][' . $k . '][type]', 'class="type inputbox" onchange="loadExtraFields(this, '.$k.', \'content\')"', 'value', 'text', $custom->type);
-                $html .= JHtml::_('bootstrap.addSlide', 'minicckCustomfields', $custom->title, 'collapse' . $k);
+                $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][category_customfields][' . $k . '][type]', 'class="type inputbox" onchange="loadExtraFields(this, '.$k.', \'category\')"', 'value', 'text', $custom->type);
+                $html .= JHtml::_('bootstrap.addSlide', 'category_minicckCustomfields', $custom->title, 'category_collapse' . $k);
                 $html .= <<<HTML
-<div id="field_$k" class="field_contayner">
+<div id="category_field_$k" class="field_contayner">
 <div style="width: 50%; float: left">
 <div class="control-group">
 	<div class="control-label">
         <label>$fname</label>
 	</div>
 	<div class="controls">
-        <input type="text" id="name_{$custom->name}" name="jform[params][customfields][$k][name]" value="{$custom->name}" size="20" class="name inputbox" aria-invalid="false" readonly="readonly" onblur="checkEnter(this)"/>
+        <input type="text" id="category_name_{$custom->name}" name="jform[params][category_customfields][$k][name]" value="{$custom->name}" size="20" class="name inputbox" aria-invalid="false" readonly="readonly" onblur="checkEnter(this)"/>
 	</div>
 </div>
 <div class="control-group">
@@ -197,7 +195,7 @@ HTML;
         <label>$ftitle</label>
 	</div>
 	<div class="controls">
-        <input type="text" name="jform[params][customfields][$k][title]" value="{$custom->title}" size="20" class="title inputbox" aria-invalid="false" />
+        <input type="text" name="jform[params][category_customfields][$k][title]" value="{$custom->title}" size="20" class="title inputbox" aria-invalid="false" />
 	</div>
 </div>
 <div class="control-group">
@@ -211,13 +209,13 @@ HTML;
         <label>$fparams</label>
 	</div>
 	<div class="controls">
-        <textarea name="jform[params][customfields][$k][params]" cols="40" rows="5" class="params inputbox">{$custom->params}</textarea>
+        <textarea name="jform[params][category_customfields][$k][params]" cols="40" rows="5" class="params inputbox">{$custom->params}</textarea>
 	</div>
 </div>
 </div>
-<div style="width: 50%; float: left" id="extra_params_$k" class="extra_params">$extraparams</div>
+<div style="width: 50%; float: left" id="category_extra_params_$k" class="extra_params">$extraparams</div>
 <div style="clear: both;"></div>
-<input type="button" class="btn btn-danger del-button" value="$fdel" onclick="fieldDel('field_$k')">
+<input type="button" class="btn btn-danger del-button" value="$fdel" onclick="fieldDel('category_field_$k')">
 </div>
 HTML;
                 $k++;
@@ -226,9 +224,9 @@ HTML;
         }
         $html .= JHtml::_('bootstrap.endAccordion');
         $html .= <<<HTML
-        <input type="hidden" id="numFields" value="$numFields"/>
+        <input type="hidden" id="category_numFields" value="$numFields"/>
         </fieldset>
-        <input type="button" class="btn btn-small btn-success del_button" value="$fadd" onclick="fieldAdd('content')" />
+        <input type="button" class="btn btn-small btn-success del_button" value="$fadd" onclick="fieldAdd('category')" />
 HTML;
         return $html;
     }

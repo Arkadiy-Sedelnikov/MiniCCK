@@ -26,7 +26,7 @@ class JFormFieldMcradio extends MiniCCKFields
         return JText::_('PLG_MINICCK_RADIO');
     }
 
-    function getInput()
+    function getInput($entityType='content')
     {
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
@@ -34,7 +34,7 @@ class JFormFieldMcradio extends MiniCCKFields
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
-        $field = plgSystemMinicck::getCustomField($name);
+        $field = plgSystemMinicck::getCustomField($name, $entityType);
         $options = array();
         if(is_array($field["params"]) && count($field["params"])>0)
         {

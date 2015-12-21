@@ -1,60 +1,61 @@
-function fieldAdd()
+function fieldAdd(tab)
 {
     var numFields = 0;
     var fieldName = 1;
+    var prefix = tab == 'content' ? '' : tab + '_';
 
-    while (jQuery('#field_'+(numFields)).length > 0) {
+    while (jQuery('#'+prefix+'field_'+(numFields)).length > 0) {
         numFields ++;
     }
 
-    while (jQuery('#name_field_'+fieldName).length > 0) {
+    while (jQuery('#'+prefix+'name_field_'+fieldName).length > 0) {
         fieldName ++;
     }
 
-    var field 	 = jQuery('div.accordion-group:first', '#minicckCustomfields');
+    var field 	 = jQuery('div.accordion-group:first', '#'+prefix+'minicckCustomfields');
     var newField = field.clone();
 
     jQuery('.accordion-heading a', newField)
         .text('New field')
-        .attr('href','#collapse'+numFields);
+        .attr('href','#'+prefix+'collapse'+numFields);
 
     jQuery('.accordion-body', newField)
-        .attr('id', 'collapse'+numFields);
+        .attr('id', prefix+'collapse'+numFields);
 
     jQuery('input.name', newField)
         .val('field_'+(fieldName))
-        .attr('name', 'jform[params][customfields]['+numFields+'][name]')
-        .attr('id', 'name_field_'+fieldName)
+        .attr('name', 'jform[params]['+prefix+'customfields]['+numFields+'][name]')
+        .attr('id', prefix+'name_field_'+fieldName)
         .removeAttr('readonly');
 
     jQuery('input.title', newField)
         .val('')
-        .attr('name', 'jform[params][customfields]['+numFields+'][title]');
+        .attr('name', 'jform[params]['+prefix+'customfields]['+numFields+'][title]');
 
     jQuery('.chzn-container', newField).remove();
 
     jQuery('select.type', newField)
-        .attr('name', 'jform[params][customfields]['+numFields+'][type]')
-        .attr('onchange', 'loadExtraFields(this, '+numFields+')')
+        .attr('name', 'jform[params]['+prefix+'customfields]['+numFields+'][type]')
+        .attr('onchange', 'loadExtraFields(this, '+numFields+', "'+tab+'")')
         .prop('selectedIndex',0)
         .show();
 
     jQuery('.extra_params', newField)
-        .attr('id', 'extra_params_'+numFields)
+        .attr('id', prefix+'extra_params_'+numFields)
         .text('');
 
 
     jQuery('textarea.params', newField)
         .text('')
-        .attr('name', 'jform[params][customfields]['+numFields+'][params]');
+        .attr('name', 'jform[params]['+prefix+'customfields]['+numFields+'][params]');
 
     jQuery('input.del-button', newField)
-        .attr('onclick', 'fieldDel("field_'+numFields+'")');
+        .attr('onclick', 'fieldDel("'+prefix+'field_'+numFields+'")');
 
     jQuery('div.field_contayner', newField)
-        .attr('id', 'field_'+numFields);
+        .attr('id', prefix+'field_'+numFields);
 
-    jQuery('#minicckCustomfields').append(newField);
+    jQuery('#'+prefix+'minicckCustomfields').append(newField);
 
     jQuery('select.type', '#field_'+numFields)
         .chosen({
@@ -90,12 +91,13 @@ function anchor(){
     }
 }
 
-function contentTypeAdd(){
-    var numFields = jQuery('.content_type_contayner').length;
-    var type = jQuery('div.accordion-group:first', '#minicckTypes');
+function contentTypeAdd(tab){
+    var prefix = tab == 'content' ? '' : tab + '_';
+    var numFields = jQuery('.'+tab+'_type_contayner').length;
+    var type = jQuery('div.accordion-group:first', '#'+prefix+'minicckTypes');
     var newContentType = type.clone();
 
-    while (jQuery('#content_type_'+numFields).length > 0)
+    while (jQuery('#'+tab+'_type_'+numFields).length > 0)
     {
         numFields ++;
     }
@@ -108,20 +110,20 @@ function contentTypeAdd(){
         .attr('id', 'collapseType'+numFields);
 
     jQuery('input.name', newContentType)
-        .val('content_type_'+(numFields+1))
-        .attr('name', 'jform[params][content_types]['+numFields+'][name]')
+        .val(tab+'_type_'+(numFields+1))
+        .attr('name', 'jform[params]['+tab+'_types]['+numFields+'][name]')
         .removeAttr('readonly');
 
     jQuery('input.title', newContentType)
         .val('')
-        .attr('name', 'jform[params][content_types]['+numFields+'][title]');
+        .attr('name', 'jform[params]['+tab+'_types]['+numFields+'][title]');
 
     jQuery('.chzn-container', newContentType).remove();
 
     var select = jQuery('select.content_type_tmpl', newContentType);
 
     jQuery('option:selected', select).removeAttr('selected');
-    select.attr('name', 'jform[params][content_types]['+numFields+'][content_tmpl]')
+    select.attr('name', 'jform[params]['+tab+'_types]['+numFields+'][content_tmpl]')
         .show()
         .chosen({
             disable_search_threshold : 10,
@@ -130,7 +132,7 @@ function contentTypeAdd(){
 
     select = jQuery('select.category_type_tmpl', newContentType);
     jQuery('option:selected', select).removeAttr('selected');
-    select.attr('name', 'jform[params][content_types]['+numFields+'][category_tmpl]')
+    select.attr('name', 'jform[params]['+tab+'_types]['+numFields+'][category_tmpl]')
         .show()
         .chosen({
             disable_search_threshold : 10,
@@ -142,7 +144,7 @@ function contentTypeAdd(){
             var cb = jQuery(this);
             var name_suffix = cb.attr('id').split('-');
             cb.removeAttr('checked')
-                .attr('name', 'jform[params][content_types]['+numFields+'][fields]['+name_suffix[0]+']['+name_suffix[2]+']');
+                .attr('name', 'jform[params]['+tab+'_types]['+numFields+'][fields]['+name_suffix[0]+']['+name_suffix[2]+']');
         }
     );
 
@@ -151,7 +153,7 @@ function contentTypeAdd(){
             var select = jQuery(this);
             var name_suffix = select.attr('data-field');
             jQuery('option:selected', select).removeAttr('selected');
-            select.attr('name', 'jform[params][content_types]['+numFields+'][fields]['+name_suffix+'][content_tmpl]')
+            select.attr('name', 'jform[params]['+tab+'_types]['+numFields+'][fields]['+name_suffix+'][content_tmpl]')
                 .show()
                 .chosen({
                     disable_search_threshold : 10,
@@ -165,7 +167,7 @@ function contentTypeAdd(){
             var select = jQuery(this);
             var name_suffix = select.attr('data-field');
             jQuery('option:selected', select).removeAttr('selected');
-            select.attr('name', 'jform[params][content_types]['+numFields+'][fields]['+name_suffix+'][category_tmpl]')
+            select.attr('name', 'jform[params]['+tab+'_types]['+numFields+'][fields]['+name_suffix+'][category_tmpl]')
                 .show()
                 .chosen({
                     disable_search_threshold : 10,
@@ -175,25 +177,25 @@ function contentTypeAdd(){
     );
 
     jQuery('input.del-button', newContentType)
-        .attr('onclick', 'contentTypeDel("content_type_'+numFields+'")');
+        .attr('onclick', 'contentTypeDel("'+tab+'_type_'+numFields+'", "'+tab+'")');
 
-    jQuery('div.content_type_contayner', newContentType)
-        .attr('id', 'content_type_'+numFields);
+    jQuery('div.'+tab+'_type_contayner', newContentType)
+        .attr('id', tab+'_type_'+numFields);
 
-    jQuery('#minicckTypes').append(newContentType);
+    jQuery('#'+prefix+'minicckTypes').append(newContentType);
 
     if(jQuery('.accordion-body',newContentType).height() == 0)
     {
         jQuery('a.accordion-toggle',newContentType).click();
     }
 
-    window.location.hash = 'content_type_'+numFields;
+    window.location.hash = tab+'_type_'+numFields;
     anchor();
 }
 
-function contentTypeDel(id)
+function contentTypeDel(id, tab)
 {
-    var numFields = jQuery('.content_type_contayner').length;
+    var numFields = jQuery('.'+tab+'_type_contayner').length;
     if(numFields > 1)
     {
         jQuery('#'+id).parents('.accordion-group').remove();
@@ -250,17 +252,7 @@ function trim(string)
 }
 
 function reloadMinicckFields(element){
-    var type = jQuery(element).val();
-    if (type == ''){
-        return;
-    }
 
-    var typeFields = minicckTypeFields[type];
-
-    var count = 0;
-    for (var key in typeFields){count++;}
-    if(count == 0)
-        return;
 
     jQuery('div.control-group', '#minicck')
         .not('#minicck_content_type_contayner')
@@ -273,6 +265,19 @@ function reloadMinicckFields(element){
         .attr('disabled','disabled');
     jQuery('textarea', '#minicck')
         .attr('disabled','disabled');
+
+    var type = jQuery(element).val();
+    if (type == ''){
+        return;
+    }
+
+    var typeFields = minicckTypeFields[type];
+
+    var count = 0;
+    for (var key in typeFields){count++;}
+    if(count == 0)
+        return;
+
     for (var i=0; i < typeFields.length; i++)
     {
         var cont = jQuery('div.control-group.'+typeFields[i]);
@@ -283,10 +288,11 @@ function reloadMinicckFields(element){
     }
 }
 
-function loadExtraFields(select, id)
+function loadExtraFields(select, id, tab)
 {
     var field = jQuery(select).val();
-    var extraParamsDiv = jQuery('#extra_params_'+id);
+    var prefix = tab == 'content' ? '' : tab + '_';
+    var extraParamsDiv = jQuery('#'+prefix+'extra_params_'+id);
     extraParamsDiv.text('');
 
     if(!fieldsExtraOptions[field]){
@@ -320,7 +326,7 @@ function loadExtraFields(select, id)
             element.attr('value', extraFields[i].value);
         }
 
-        element.attr('name', 'jform[params][customfields]['+id+'][extraparams]['+extraFields[i].name+']');
+        element.attr('name', 'jform[params]['+prefix+'customfields]['+id+'][extraparams]['+extraFields[i].name+']');
 
         for(var k in extraFields[i].attr)
         {

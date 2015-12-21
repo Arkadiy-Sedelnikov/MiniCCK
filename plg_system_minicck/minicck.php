@@ -11,8 +11,11 @@ jimport('joomla.filesystem.file');
 
 class plgSystemMinicck extends JPlugin
 {
-    private static $customfields = null;
-    private static $contentTypes = null;
+    private static
+        $customfields = null,
+        $contentTypes = null,
+        $categoryCustomfields = null,
+        $categoryContentTypes = null;
 
     private
         $input,
@@ -48,138 +51,138 @@ class plgSystemMinicck extends JPlugin
         }
     }
 
-    /** Сохранение данных
+    /** Проверка заполненности обязательных полей перед сохранением
      * @param $context
-     * @param $article
-     * @param $isNew
+     * @param $table
+     * @param bool $isNew
      * @return bool
      * @throws Exception
      */
-    public function onContentAfterSave($context, $article, $isNew)
+    public function onExtensionBeforeSave($context, $table, $isNew=false)
     {
-        if($context !== 'com_content.article' && $context !== 'com_content.form')
-            return true;
-
-        $articleId	= $article->id;
-
-        $data = (
-            isset($_POST['minicck'])
-            && is_array($_POST['minicck'])
-            && count($_POST['minicck'])>0
-        ) ? $_POST['minicck'] : null;
-
-        if ($articleId && $data)
+        if($context !== 'com_plugins.plugin' || $table->element != 'minicck')
         {
-            if(!self::$customfields)
+            return true;
+        }
+
+        $params = json_decode($table->params);
+        $customfields = isset($params->customfields) ? $params->customfields : null;
+        $categoryCustomfields = isset($params->category_customfields) ? $params->category_customfields : null;
+        $content_types = isset($params->content_types) ? $params->content_types : null;
+        $category_types = isset($params->category_types) ? $params->category_types : null;
+
+        if(!is_array($customfields) || count($customfields) == 0)
+        {
+            throw new Exception('Custom Fields is Empty');
+        }
+
+        if(!is_array($content_types) || count($content_types) == 0)
+        {
+            throw new Exception('Content Types is Empty');
+        }
+
+        $app = JFactory::getApplication();
+
+        //проверяем заполненность обязательных полей
+        foreach($customfields as $v)
+        {
+            if(empty($v->name))
             {
-                $this->setCustomFields();
+                throw new Exception('Custom Field Name is Empty');
             }
 
-            try
+            if(empty($v->type))
             {
-                $object = new stdClass();
-                $object->content_id = $articleId;
+                throw new Exception('Custom Field "'.$v->name.'" Type is Empty');
+            }
 
-                $config = $this->config["params"];
+            if(empty($v->title))
+            {
+                $app->enqueueMessage(JText::_('Custom Field "'.$v->name.'" Title is Empty'), 'error');
+                return true;
+            }
+        }
 
-                if(!empty($config->enable_multi_categories))
+        //проверяем заполненность обязательных полей типов контента
+        foreach($content_types as $v)
+        {
+            if(empty($v->name))
+            {
+                throw new Exception('Content Type Name is Empty');
+            }
+
+            if(empty($v->title))
+            {
+                $app->enqueueMessage(JText::_('Content Type "'.$v->name.'" Title is Empty'), 'error');
+                return true;
+            }
+        }
+
+        if(!empty($params->allow_category_fields))
+        {
+            if(is_array($categoryCustomfields) && count($categoryCustomfields))
+            {
+                foreach($categoryCustomfields as $v)
                 {
-                    $multiCats = (!empty($data['multi_categories'])) ? $data['multi_categories'] : array();
-                    $this->saveMultiCats($multiCats, $articleId);
-                }
-
-                foreach($data as $k => $v)
-                {
-                    if($k == 'content_type' || $k == 'multi_categories')
+                    if(empty($v->name))
                     {
-                        $object->$k = $v;
-                        continue;
+                        throw new Exception('Category Custom Field Name is Empty');
                     }
 
-                    $cleanedData = array();
-
-                    $field = self::getCustomField($k);
-
-                    $className = $this->loadElement($field);
-
-                    if($className != false && method_exists($className,'cleanValue'))
+                    if(empty($v->type))
                     {
-                        $cleanedData = $className::cleanValue($field, $v);
-                    }
-                    else
-                    {
-                        if(is_array($v) && count($v)>0)
-                        {
-                            foreach($v as $key => $val)
-                            {
-                                $cleanedData[$key] = htmlspecialchars(strip_tags($val));
-                            }
-                        }
-                        else
-                        {
-                            $cleanedData = htmlspecialchars(strip_tags($v));
-                        }
+                        throw new Exception('Category Custom Field "'.$v->name.'" Type is Empty');
                     }
 
-                    if(method_exists($className, 'prepareToSaveValue'))
+                    if(empty($v->title))
                     {
-                        $value = $className::prepareToSaveValue($cleanedData);
+                        $app->enqueueMessage(JText::_('Category Custom Field "'.$v->name.'" Title is Empty'), 'error');
+                        return true;
                     }
-                    else
-                    {
-                        $value = is_array($cleanedData) ? implode(',', $cleanedData) : $cleanedData;
-                    }
-                    $object->$k = $value;
-                }
-
-                $db = JFactory::getDbo();
-
-                $query = $db->getQuery(true);
-                $query->delete('#__minicck');
-                $query->where('content_id = ' . $db->Quote($articleId));
-                $db->setQuery($query);
-
-                if (!$db->execute())
-                {
-                    throw new Exception($db->getErrorMsg());
-                }
-
-                if (!$db->insertObject('#__minicck', $object))
-                {
-                    throw new Exception($db->getErrorMsg());
                 }
             }
-            catch (Exception $e)
+
+            if(is_array($category_types) && count($category_types))
             {
-                $this->_subject->setError($e->getMessage());
-                return false;
+                foreach($category_types as $v)
+                {
+                    if(empty($v->name))
+                    {
+                        throw new Exception('Category Type Name is Empty');
+                    }
+
+                    if(empty($v->title))
+                    {
+                        $app->enqueueMessage(JText::_('Category Type "'.$v->name.'" Title is Empty'), 'error');
+                        return true;
+                    }
+                }
             }
         }
         return true;
     }
 
-    private function getData($articleId)
+    /** Создание новых и удаление удаленных полей из таблицы
+     * @param $context
+     * @param $table
+     * @param bool $isNew
+     * @return bool
+     * @throws Exception
+     */
+    public function onExtensionAfterSave($context, $table, $isNew=false)
     {
-        $results = null;
-
-        if($articleId > 0)
+        if($context !== 'com_plugins.plugin' || $table->element != 'minicck')
         {
-            $db = JFactory::getDbo();
-            $query = $db->getQuery(true);
-            $query->select('*');
-            $query->from('#__minicck');
-            $query->where('content_id = ' . $db->Quote($articleId));
-            $db->setQuery($query,0,1);
-            $results = $db->loadAssoc();
-
-            if ($db->getErrorNum())
-            {
-                $this->_subject->setError($db->getErrorMsg());
-                return false;
-            }
+            return true;
+        }
+        $params = json_decode($table->params);
+        $this->processContentFields($params);
+        if(!empty($params->allow_category_fields))
+        {
+            $this->processContentFields($params, 'category');
         }
 
-        return (!empty($results)) ? $results : false;
+        return true;
     }
 
     /** Форма в редактировании контента
@@ -189,17 +192,44 @@ class plgSystemMinicck extends JPlugin
      */
     function onContentPrepareData($context, $data)
     {
-        if (!($context == 'com_content.article'
-                && $this->input->getCmd('layout', '') === 'edit')
-            || (!is_object($data) && !is_array($data))
-        ) return true;
+        if(!is_object($data) && !is_array($data)){
+            return true;
+        }
+
+        $layout = $this->input->getCmd('layout', '');
+        $isCategory = $isContent = false;
+
+        $prefix = '';
+        if ($context == 'com_content.article' && $layout == 'edit')
+        {
+            $isContent = true;
+            $prefix = 'content';
+        }
+        else if ($context == 'com_categories.category' && $layout == 'edit')
+        {
+            $isCategory = true;
+            $prefix = 'category';
+        }
+
+        if(!$isCategory && !$isContent)
+        {
+            return true;
+        }
 
         $config = $this->config["params"];
         $articleId = 0;
 
-        if(!self::$contentTypes)
+        if($isContent)
         {
-            $this->setContentTypes();
+            if(!self::$contentTypes)
+                $this->setContentTypes();
+            $contentTypes = self::$contentTypes;
+        }
+        else if($isCategory)
+        {
+            if(!self::$categoryContentTypes)
+                $this->setContentTypes('category');
+            $contentTypes = self::$categoryContentTypes;
         }
 
         if(is_object($data) && !empty($data->id))
@@ -213,7 +243,7 @@ class plgSystemMinicck extends JPlugin
 
         $html = '<div class="tab-pane" id="minicck">';
 
-        if(!empty($config->enable_multi_categories))
+        if(!empty($config->enable_multi_categories) && $isContent)
         {
             $selectedCats = $this->getSelectedMultiCats($articleId);
             $html .= '
@@ -222,17 +252,17 @@ class plgSystemMinicck extends JPlugin
                 <div class="controls">
                         <select name="minicck[multi_categories][]" id="minicck_multi_categories" multiple="multiple" size="10">
                             '.JHtml::_('select.options',
-                            JHtml::_('category.categories', 'com_content', array('filter.published' => 1)),
-                            'value', 'text', $selectedCats).'
+                    JHtml::_('category.categories', 'com_content', array('filter.published' => 1)),
+                    'value', 'text', $selectedCats).'
 			        </select>
                 </div>
             </div>
 			';
         }
 
-        $dataMinicck = $this->getData($articleId);
+        $dataMinicck = $this->getData($articleId, $prefix);
 
-        $options = $this->gerContentTypeOptions();
+        $options = $this->gerContentTypeOptions($prefix);
 
         if(!$options)
         {
@@ -248,18 +278,18 @@ class plgSystemMinicck extends JPlugin
         }
 
         $contentType = (!empty($dataMinicck['content_type'])) ? $dataMinicck['content_type'] : '';
-        
-        if($contentType == '' || empty(self::$contentTypes[$contentType]))
+
+        if($contentType == '' || empty($contentTypes[$contentType]))
         {
             $contentTypeFields = new stdClass();
         }
         else
         {
-            $contentTypeFields = self::$contentTypes[$contentType]->fields;
+            $contentTypeFields = $contentTypes[$contentType]->fields;
         }
 
         $js = 'var minicckTypeFields = [];';
-        foreach (self::$contentTypes as $type)
+        foreach ($contentTypes as $type)
         {
             if(isset($type->fields) && count($type->fields))
             {
@@ -284,14 +314,24 @@ class plgSystemMinicck extends JPlugin
         <hr style="clear:both"/>
 HTML;
 
-        if(!self::$customfields)
+        $customfields = array();
+
+        if($isContent)
         {
-            $this->setCustomFields();
+            if(!self::$customfields)
+                $this->setCustomFields();
+            $customfields = self::$customfields;
+        }
+        else if($isCategory)
+        {
+            if(!self::$categoryCustomfields)
+                $this->setCustomFields('category');
+            $customfields = self::$categoryCustomfields;
         }
 
-        if(count(self::$customfields)>0)
+        if(count($customfields)>0)
         {
-            foreach(self::$customfields as $customfield)
+            foreach($customfields as $customfield)
             {
                 $className = $this->loadElement($customfield);
 
@@ -315,7 +355,7 @@ HTML;
 
                 $element = new $className('minicck['.$attributes['name'].']', $attributes, $value);
 
-                $html .= $element->getInput();
+                $html .= $element->getInput($prefix);
             }
         }
         $html .= '</div>';
@@ -331,13 +371,16 @@ HTML;
     {
         $isAdmin = JFactory::getApplication()->isAdmin();
         $view = $this->input->getCmd('view', '');
-        if (!( $this->input->getCmd('option', '') == 'com_content'
-            && (
-                ($isAdmin && $view == 'article')
-                || (!$isAdmin && $view == 'form')
-            )
-            && $this->input->getCmd('layout', '') === 'edit' )
-        ) return;
+        $option = $this->input->getCmd('option', '');
+        $layout = $this->input->getCmd('layout', '');
+        $extension = $this->input->getCmd('extension', '');
+
+        $isContent = $option == 'com_content' && ( ($isAdmin && $view == 'article') || (!$isAdmin && $view == 'form') ) && $layout === 'edit';
+        $isCategory = $isAdmin && $option == 'com_categories' && $extension == 'com_content' && $view == 'category';
+
+        if(!$isContent && !$isCategory){
+            return;
+        }
 
         $document = JFactory::getDocument();
         if($isAdmin)
@@ -375,6 +418,152 @@ HTML;
 
     }
 
+
+    /** Сохранение данных
+     * @param $context
+     * @param $article
+     * @param $isNew
+     * @return bool
+     * @throws Exception
+     */
+    public function onContentAfterSave($context, $article, $isNew)
+    {
+        if($context !== 'com_content.article' && $context !== 'com_content.form' && $context !== 'com_categories.category')
+            return true;
+
+        $articleId	= $article->id;
+
+        $isCategory = $context == 'com_categories.category';
+
+        $data = (
+            isset($_POST['minicck'])
+            && is_array($_POST['minicck'])
+            && count($_POST['minicck'])>0
+        ) ? $_POST['minicck'] : null;
+
+        if ($articleId && $data)
+        {
+            if($isCategory)
+            {
+                if(!self::$categoryCustomfields)
+                {
+                    $this->setCustomFields('category');
+                }
+            }
+            else
+            {
+                if(!self::$customfields)
+                {
+                    $this->setCustomFields();
+                }
+            }
+
+            try
+            {
+                $object = new stdClass();
+
+                if($isCategory){
+                    $object->category_id = $articleId;
+                }
+                else{
+                    $object->content_id = $articleId;
+                }
+
+
+                $config = $this->config["params"];
+
+                if(!empty($config->enable_multi_categories) && !$isCategory)
+                {
+                    $multiCats = (!empty($data['multi_categories'])) ? $data['multi_categories'] : array();
+                    $this->saveMultiCats($multiCats, $articleId);
+                }
+
+                $entityType = $isCategory ? 'category' : 'content';
+
+                foreach($data as $k => $v)
+                {
+                    if($k == 'content_type' || $k == 'multi_categories')
+                    {
+                        $object->$k = $v;
+                        continue;
+                    }
+
+                    $cleanedData = array();
+
+                    $field = self::getCustomField($k, $entityType);
+
+                    $className = $this->loadElement($field);
+
+                    if($className != false && method_exists($className,'cleanValue'))
+                    {
+                        $cleanedData = $className::cleanValue($field, $v);
+                    }
+                    else
+                    {
+                        if(is_array($v) && count($v)>0)
+                        {
+                            foreach($v as $key => $val)
+                            {
+                                $cleanedData[$key] = htmlspecialchars(strip_tags($val));
+                            }
+                        }
+                        else
+                        {
+                            $cleanedData = htmlspecialchars(strip_tags($v));
+                        }
+                    }
+
+                    if(method_exists($className, 'prepareToSaveValue'))
+                    {
+                        $value = $className::prepareToSaveValue($cleanedData);
+                    }
+                    else
+                    {
+                        $value = is_array($cleanedData) ? implode(',', $cleanedData) : $cleanedData;
+                    }
+                    $object->$k = $value;
+                }
+
+                if($isCategory)
+                {
+                    $table = '#__minicck_category_fields';
+                    $key = 'category_id';
+                }
+                else
+                {
+                    $table = '#__minicck';
+                    $key = 'content_id';
+                }
+
+                $db = JFactory::getDbo();
+
+                $query = $db->getQuery(true);
+                $query->delete($table);
+                $query->where($db->quoteName($key) . ' = ' . $db->Quote($articleId));
+                $db->setQuery($query);
+
+                if (!$db->execute())
+                {
+                    throw new Exception($db->getErrorMsg());
+                }
+
+                if(!empty($object->content_type)){
+                    if (!$db->insertObject($table, $object))
+                    {
+                        throw new Exception($db->getErrorMsg());
+                    }
+                }
+
+            }
+            catch (Exception $e)
+            {
+                $this->_subject->setError($e->getMessage());
+                return false;
+            }
+        }
+        return true;
+    }
+
     /** Действия при удалении контента
      * @param	string		The context of the content passed to the plugin (added in 1.6)
      * @param	object		A JTableContent object
@@ -383,8 +572,19 @@ HTML;
     public function onContentAfterDelete($context, $article)
     {
 
-        if ($context != 'com_content.article')
+        if ($context != 'com_content.article' && $context != 'com_categories.category')
             return true;
+
+        $isCategory = $context == 'com_categories.category';
+
+        if($isCategory){
+            $table = '#__minicck_category_fields';
+            $key = 'category_id';
+        }
+        else{
+            $table = '#__minicck';
+            $key = 'content_id';
+        }
 
         $articleId	= $article->id;
         if ($articleId)
@@ -395,8 +595,8 @@ HTML;
 
                 $query = $db->getQuery(true);
                 $query->delete();
-                $query->from('#__minicck');
-                $query->where('content_id = ' . $db->Quote($articleId));
+                $query->from($table);
+                $query->where($db->quoteName($key) . ' = ' . $db->Quote($articleId));
                 $db->setQuery($query);
 
                 if (!$db->query())
@@ -404,7 +604,11 @@ HTML;
                     throw new Exception($db->getErrorMsg());
                 }
 
-                $this->deleteMultiCats($articleId);
+                if(!$isCategory)
+                {
+                    $this->deleteMultiCats($articleId);
+                }
+
             }
             catch (Exception $e)
             {
@@ -548,7 +752,7 @@ HTML;
 
             //подключение шаблона
             ob_start();
-                require $tmpl;
+            require $tmpl;
             $html = ob_get_clean();
 
             if($position == 'top')
@@ -562,50 +766,149 @@ HTML;
         }
     }
 
-    static function getCustomFields()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private function getData($id, $type='')
     {
-        return self::$customfields;
+        $results = null;
+
+        if($id > 0)
+        {
+            switch($type){
+                case 'category':
+                    $table = '#__minicck_category_fields';
+                    $key = 'category_id';
+                    break;
+                default:
+                    $table = '#__minicck';
+                    $key = 'content_id';
+                    break;
+            }
+            $db = JFactory::getDbo();
+            $query = $db->getQuery(true);
+            $query->select('*');
+            $query->from($table);
+            $query->where($db->quoteName($key) . ' = ' . $db->Quote($id));
+            $db->setQuery($query,0,1);
+            $results = $db->loadAssoc();
+
+            if ($db->getErrorNum())
+            {
+                $this->_subject->setError($db->getErrorMsg());
+                return false;
+            }
+        }
+
+        return (!empty($results)) ? $results : false;
     }
 
-    static function getCustomField($name)
+    static function getCustomFields($type='')
     {
-        return self::$customfields[$name];
+        switch($type){
+            case 'category':
+                $data = self::$categoryCustomfields;
+                break;
+            default:
+                $data = self::$customfields;
+                break;
+        }
+        return $data;
     }
 
-    private function setContentTypes()
+    static function getCustomField($name, $type='content')
+    {
+        switch($type){
+            case 'category':
+                $data = self::$categoryCustomfields;
+                break;
+            default:
+                $data = self::$customfields;
+                break;
+        }
+
+        return isset($data[$name]) ? $data[$name] : null;
+    }
+
+    private function setContentTypes($type='content')
     {
         $params = $this->config['params'];
-
-        if(!isset($params->content_types))
+        $cfName = $type.'_types';
+        if(!isset($params->$cfName))
         {
             return;
         }
 
-        $types = $params->content_types;
+        $types = $params->$cfName;
+
         if(!is_array($types) || count($types) == 0)
         {
             return;
         }
 
         $newParams = array();
-        foreach($types as $type)
+        foreach($types as $v)
         {
-            if(count($type->fields)){
-                foreach($type->fields as $key => $field){
-                    if(!(isset($field->category) || isset($field->content))){
-                        unset($type->fields->$key);
+            if(count($v->fields))
+            {
+                foreach($v->fields as $key => $field)
+                {
+                    if($type =='content' && (!(isset($field->category) || isset($field->content))))
+                    {
+                        unset($v->fields->$key);
+                    }
+                    else if($type == 'category' && empty($field->show))
+                    {
+                        unset($v->fields->$key);
                     }
                 }
             }
-            $newParams[$type->name] = $type;
+            $newParams[$v->name] = $v;
         }
-        self::$contentTypes = $newParams;
+
+        switch($type){
+            case 'category':
+                self::$categoryContentTypes = $newParams;
+                break;
+            default:
+                self::$contentTypes = $newParams;
+                break;
+        }
     }
 
-    private function setCustomFields()
+    private function setCustomFields($type='')
     {
         $customfields = $this->config['params'];
-        $customfields = $customfields->customfields;
+        $cfName = $type != '' ? $type.'_customfields' : 'customfields';
+        $customfields = $customfields->$cfName;
+
         if(!is_array($customfields) || count($customfields) == 0){
             return;
         }
@@ -630,7 +933,16 @@ HTML;
                 $newFields[$k]['params'] = $customfield->params;
             }
         }
-        self::$customfields = $newFields;
+
+        switch($type){
+            case 'category':
+                self::$categoryCustomfields = $newFields;
+                break;
+            default:
+                self::$customfields = $newFields;
+                break;
+        }
+
     }
 
     private function getLayout($contentType)
@@ -697,131 +1009,72 @@ HTML;
         return $className;
     }
 
-    private function gerContentTypeOptions()
+    private function gerContentTypeOptions($type='content')
     {
-        if(!self::$contentTypes)
-        {
-            $this->setContentTypes();
+        switch($type){
+            case 'category':
+                $types = self::$categoryContentTypes;
+                break;
+            default:
+                $types = self::$contentTypes;
+                break;
         }
 
-        if (is_array(self::$contentTypes) && count(self::$contentTypes))
+        if(!$types)
+        {
+            $this->setContentTypes($type);
+        }
+
+        if (is_array($types) && count($types))
         {
             $options = array();
             $options[] = JHtml::_('select.option', '', JText::_('JSELECT'));
 
-            foreach (self::$contentTypes as $type)
+            foreach ($types as $v)
             {
-                $options[] = JHtml::_('select.option', $type->name, $type->title);
+                $options[] = JHtml::_('select.option', $v->name, $v->title);
             }
             return $options;
         }
         return false;
     }
 
-    /** Проверка заполненности обязательных полей перед сохранением
-     * @param $context
-     * @param $table
-     * @param bool $isNew
-     * @return bool
-     * @throws Exception
-     */
-    public function onExtensionBeforeSave($context, $table, $isNew=false)
-    {
-        if($context !== 'com_plugins.plugin' || $table->element != 'minicck')
-        {
-            return true;
-        }
 
-        $params = json_decode($table->params);
-        $customfields = $params->customfields;
-        $content_types = $params->content_types;
+
+    private function processContentFields($params, $type='content')
+    {
+        switch($type)
+        {
+            case 'category':
+                $customfields = $params->category_customfields;
+                $table = '#__minicck_category_fields';
+                $msgPrefix = 'Category';
+                break;
+            default:
+                $customfields = $params->customfields;
+                $table = '#__minicck';
+                $msgPrefix = '';
+                break;
+        }
 
         if(!is_array($customfields) || count($customfields) == 0)
         {
-            throw new Exception('Custom Fields is Empty');
-        }
-
-        if(!is_array($content_types) || count($content_types) == 0)
-        {
-            throw new Exception('Content Types is Empty');
-        }
-
-        $app = JFactory::getApplication();
-
-        //формируем новые и удаленные поля
-        foreach($customfields as $v)
-        {
-            if(empty($v->name))
-            {
-                throw new Exception('Custom Field Name is Empty');
-            }
-
-            if(empty($v->type))
-            {
-                throw new Exception('Custom Field "'.$v->name.'" Type is Empty');
-            }
-
-            if(empty($v->title))
-            {
-                $app->enqueueMessage(JText::_('Custom Field "'.$v->name.'" Title is Empty'), 'error');
-                return true;
-            }
-        }
-
-        //формируем новые и удаленные поля
-        foreach($content_types as $v)
-        {
-            if(empty($v->name))
-            {
-                throw new Exception('Content Type Name is Empty');
-            }
-
-            if(empty($v->title))
-            {
-                $app->enqueueMessage(JText::_('Content Type "'.$v->name.'" Title is Empty'), 'error');
-                return true;
-            }
-        }
-        return true;
-    }
-
-    /** Создание новых и удаление удаленных полей из таблицы
-     * @param $context
-     * @param $table
-     * @param bool $isNew
-     * @return bool
-     * @throws Exception
-     */
-    public function onExtensionAfterSave($context, $table, $isNew=false)
-    {
-        if($context !== 'com_plugins.plugin' || $table->element != 'minicck')
-        {
-            return true;
-        }
-
-        $params = json_decode($table->params);
-        $customfields = $params->customfields;
-
-        if(!is_array($customfields) || count($customfields) == 0)
-        {
-            throw new Exception('Custom Fields is Empty');
+            throw new Exception($msgPrefix.'Custom Fields is Empty');
         }
 
         $newColumn = $oldColumn = array();
         $db = JFactory::getDbo();
 
         try{
-            $columns = $db->getTableColumns('#__minicck');
+            $columns = $db->getTableColumns($table);
         }
         catch(Exception $e){
             throw new Exception($e->getMessage());
-            return false;
         }
 
         if(!is_array($columns) || count($columns) == 0)
         {
-            throw new Exception('Table Columns is Empty');
-            return false;
+            throw new Exception($msgPrefix.'Table Columns is Empty');
         }
 
         include_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
@@ -830,13 +1083,22 @@ HTML;
         //удаляем из массива служебные поля
         if(isset($columns['id']))
             unset($columns['id']);
-        if(isset($columns['content_id']))
-            unset($columns['content_id']);
-        if(isset($columns['field_values']))
-            unset($columns['field_values']);
         if(isset($columns['content_type']))
             unset($columns['content_type']);
 
+        switch($type)
+        {
+            case 'category':
+                if(isset($columns['category_id']))
+                    unset($columns['category_id']);
+                break;
+            default:
+                if(isset($columns['content_id']))
+                    unset($columns['content_id']);
+                if(isset($columns['field_values']))
+                    unset($columns['field_values']);
+                break;
+        }
 
         //формируем новые и удаленные поля
         foreach($customfields as $k => $v)
@@ -858,7 +1120,7 @@ HTML;
         {
             foreach($newColumn as $v)
             {
-                $db->setQuery('ALTER IGNORE TABLE `#__minicck` ADD `'.$v['name'].'` '.$v['columnType'].' NOT NULL')->execute();
+                $db->setQuery('ALTER IGNORE TABLE `'.$table.'` ADD `'.$v['name'].'` '.$v['columnType'].' NOT NULL')->execute();
             }
         }
 
@@ -867,11 +1129,9 @@ HTML;
         {
             foreach($columns as $k => $v)
             {
-                $db->setQuery('ALTER IGNORE TABLE `#__minicck` DROP `'.$k.'`')->execute();
+                $db->setQuery('ALTER IGNORE TABLE `'.$table.'` DROP `'.$k.'`')->execute();
             }
         }
-
-        return true;
     }
 
     /**

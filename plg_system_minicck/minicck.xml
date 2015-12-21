@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="2.5" type="plugin" group="system" method="upgrade">
+<extension version="3.0" type="plugin" group="system" method="upgrade">
 	<name>PLG_MINICCK</name>
 	<author>Arkadiy Sedelnikov</author>
-	<creationDate>11.09.2015</creationDate>
-	<copyright>(C) 2013 Arkadiy Sedelnikov. All rights reserved.</copyright>
+	<creationDate>21.12.2015</creationDate>
+	<copyright>(C) 2013 - 2016 Arkadiy Sedelnikov. All rights reserved.</copyright>
 	<license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
 	<authorEmail>a.sedelnikov@gmail.com</authorEmail>
 	<authorUrl>http://argens.ru</authorUrl>
-	<version>2.5.1</version>
+	<version>3.0</version>
 	<description>PLG_MINICCK_XML_DESCRIPTION</description>
 
 	<files>
@@ -49,21 +49,7 @@
 
 	<config>
 		<fields name="params" addfieldpath="/plugins/system/minicck/elements">
-			<fieldset name="basic">
-                <field
-                        name="customfields"
-                        type="customfields"
-                        default=""
-                        label=""/>
-			</fieldset>
-            <fieldset name="MINICCK_TYPES_CONTENT">
-                <field
-                        name="content_types"
-                        type="types"
-                        default=""
-                        label=""/>
-            </fieldset>
-            <fieldset name="advanced">
+            <fieldset name="basic">
                 <field
                         name="allow_in_content"
                         type="radio"
@@ -110,7 +96,7 @@
                         directory="/plugins/system/minicck/tmpl"
                         default="default.php"
                         hide_none="1"
-		                hide_default="1"
+                        hide_default="1"
                         exclude=".html"
                         label="PLG_MINICCK_CONTENT_LAYOUT"
                         description="PLG_MINICCK_CONTENT_LAYOUT_DESC" />
@@ -120,7 +106,7 @@
                         directory="/plugins/system/minicck/tmpl"
                         default="default_cat.php"
                         hide_none="1"
-		                hide_default="1"
+                        hide_default="1"
                         exclude=".html"
                         label="PLG_MINICCK_CATEGORY_LAYOUT"
                         description="PLG_MINICCK_CATEGORY_LAYOUT_DESC" />
@@ -184,13 +170,54 @@
                     <option value="1">JYES</option>
                     <option value="0">JNO</option>
                 </field>
+            </fieldset>
+            <fieldset name="MINICCK_CONTENT_FIELDS">
+                <field
+                        name="customfields"
+                        type="customfields"
+                        default=""
+                        label=""/>
 			</fieldset>
+            <fieldset name="MINICCK_TYPES_CONTENT">
+                <field
+                        name="content_types"
+                        type="types"
+                        default=""
+                        label=""/>
+            </fieldset>
+            <fieldset name="MINICCK_CATEGORY_FIELDS">
+                <field
+                        name="allow_category_fields"
+                        type="radio"
+                        class="btn-group"
+                        default="0"
+                        label="PLG_MINICCK_ALLOW_CATEGORY_FIELDS"
+                        description="PLG_MINICCK_ALLOW_CATEGORY_FIELDS_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
+                        name="category_customfields"
+                        type="categorycustomfields"
+                        default=""
+                        label=""
+                />
+			</fieldset>
+            <fieldset name="MINICCK_CATEGORY_TYPES">
+                <field
+                        name="category_types"
+                        type="categorytypes"
+                        default=""
+                        label=""
+                />
+            </fieldset>
+
 		</fields>
 	</config>
     <updateservers>
         <server
             type="extension"
             priority="1"
-            name="MiniCCK Updates"><![CDATA[http://argens.ru/index.php?option=com_ars&view=update&task=stream&format=xml&id=3&dummy=extension.xml]]></server>
+            name="MiniCCK Updates"><![CDATA[http://argens.ru/index.php?option=com_ars&view=update&task=stream&format=xml&id=4&dummy=extension.xml]]></server>
     </updateservers>
 </extension>

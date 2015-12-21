@@ -26,7 +26,7 @@ class JFormFieldMctext extends MiniCCKFields
         return JText::_('PLG_MINICCK_TEXT');
     }
 
-    function getInput()
+    function getInput($entityType='content')
     {
         $name = $this->attributes['name'];
         $label = $this->attributes['label'];
@@ -34,7 +34,7 @@ class JFormFieldMctext extends MiniCCKFields
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
-        $field = plgSystemMinicck::getCustomField($name);
+        $field = plgSystemMinicck::getCustomField($name, $entityType);
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
         $html = '<div class="control-group '.$name.'"'.$hidden.'>';

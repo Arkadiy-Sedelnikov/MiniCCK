@@ -26,7 +26,7 @@ class JFormFieldMcimage extends MiniCCKFields
         return JText::_('PLG_MINICCK_IMAGE');
     }
 
-    function getInput()
+    function getInput($entityType='content')
     {
         if(!defined('PLG_MINICCK_MCIMAGE_LOADED')){
             define('PLG_MINICCK_MCIMAGE_LOADED', 1);
@@ -56,7 +56,7 @@ class JFormFieldMcimage extends MiniCCKFields
         $value = $this->value;
 
 
-        $field = plgSystemMinicck::getCustomField($name);
+        $field = plgSystemMinicck::getCustomField($name, $entityType);
         $directory = trim($field["params"]);
         $directory = (!empty($directory)) ? $directory : '';
 

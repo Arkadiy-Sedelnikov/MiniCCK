@@ -27,7 +27,7 @@ class JFormFieldSlider extends MiniCCKFields
         return JText::_('PLG_MINICCK_SLIDER');
     }
 
-    function getInput()
+    function getInput($entityType='content')
     {
         if(!defined('PLG_MINICCK_SLIDER_LOADED')){
             define('PLG_MINICCK_SLIDER_LOADED', 1);
@@ -44,7 +44,7 @@ class JFormFieldSlider extends MiniCCKFields
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = json_decode($this->value, true);
-        $field = plgSystemMinicck::getCustomField($name);
+        $field = plgSystemMinicck::getCustomField($name, $entityType);
         $directory = trim($field["params"]);
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);

@@ -11,17 +11,18 @@ jimport('joomla.html.html');
 jimport('joomla.form.formfield');
 jimport('joomla.filesystem.folder');
 
-class JFormFieldTypes extends JFormField
+class JFormFieldCategorytypes extends JFormField
 {
-    var $type = 'Types';
+    var $type = 'Categorytypes';
     var $fields;
     var $pluginParams;
     var $fieldTemplates;
+    var $prefix = 'category';
 
     function __construct(){
         $plugin = JPluginHelper::getPlugin('system', 'minicck');
         $this->pluginParams = (!empty($plugin->params)) ? json_decode($plugin->params) : new stdClass();
-        $this->fields = (!empty($this->pluginParams->customfields)) ? $this->pluginParams->customfields : array();
+        $this->fields = (!empty($this->pluginParams->category_customfields)) ? $this->pluginParams->category_customfields : array();
         $this->fieldTemplates = $this->getFieldTemplates();
         parent::__construct();
     }
@@ -40,27 +41,27 @@ class JFormFieldTypes extends JFormField
                 type="button"
                 class="btn btn-small btn-success del_button"
                 value="$add"
-                onclick="contentTypeAdd('content')"
+                onclick="contentTypeAdd('{$this->prefix}')"
                 /><br><br>
             <fieldset class="panelform">
 HTML;
-        $html .= JHtml::_('bootstrap.startAccordion', 'minicckTypes', array('active' => 'collapseType0'));
-        if (empty($this->pluginParams->content_types))
+        $html .= JHtml::_('bootstrap.startAccordion', $this->prefix.'_minicckTypes', array('active' => 'collapseType0'));
+        if (empty($this->pluginParams->category_types))
         {
-            $html .= JHtml::_('bootstrap.addSlide', 'minicckTypes', 'New Type', 'collapseType0');
+            $html .= JHtml::_('bootstrap.addSlide', $this->prefix.'_minicckTypes', 'New Type', 'collapseType0');
             $html .= $this->loadType(0);
             $html .= JHtml::_('bootstrap.endSlide');
         }
         else
         {
-            if(is_array($this->pluginParams->content_types) && count($this->pluginParams->content_types))
+            if(is_array($this->pluginParams->category_types) && count($this->pluginParams->category_types))
             {
-                $numTypes = count($this->pluginParams->content_types);
+                $numTypes = count($this->pluginParams->category_types);
                 $k = 0;
-                foreach ($this->pluginParams->content_types as $type)
+                foreach ($this->pluginParams->category_types as $type)
                 {
                     $title = (!empty($type->title)) ? $type->title : 'Empty Title';
-                    $html .= JHtml::_('bootstrap.addSlide', 'minicckTypes', $title, 'collapseType'.$k);
+                    $html .= JHtml::_('bootstrap.addSlide', $this->prefix.'_minicckTypes', $title, 'collapseType'.$k);
                     $html .= $this->loadType($k, $type);
                     $html .= JHtml::_('bootstrap.endSlide');
                     $k++;
@@ -80,7 +81,7 @@ HTML;
                 type="button"
                 class="btn btn-small btn-success del_button"
                 value="$add"
-                onclick="contentTypeAdd('content')"
+                onclick="contentTypeAdd('{$this->prefix}')"
                 />
 HTML;
 
@@ -93,20 +94,20 @@ HTML;
         $name = JText::_("PLG_MINICCK_TYPE_CONTENT_NAME");
         $title = JText::_("PLG_MINICCK_TYPE_CONTENT_TITLE");
         $del = JText::_('PLG_MINICCK_DEL_TYPE_CONTENT');
-        $tplContent = JText::_('PLG_MINICCK_TYPE_CONTENT_TPL');
-        $tplCat = JText::_('PLG_MINICCK_TYPE_CATEGORY_TPL');
 
-        $tname  = (!empty($type->name))  ? $type->name  : 'content_type_'.$id;
+        $tplCat = JText::_('PLG_MINICCK_TYPE_TPL');
+
+        $tname  = (!empty($type->name))  ? $type->name  : 'category_type_'.$id;
         $ttitle = (!empty($type->title)) ? $type->title : '';
         $readonly = (is_null($type)) ? '' : ' readonly="readonly"';
-        $options = $this->gerTplOptions();
+        $options = $this->getTplOptions();
         $selectedContent = (!empty($type->content_tmpl)) ? $type->content_tmpl : '';
         $selectedCat = (!empty($type->category_tmpl)) ? $type->category_tmpl : '';
-        $tplContentSelect = JHTML::_('select.genericlist', $options, 'jform[params][content_types]['.$id.'][content_tmpl]', 'class="content_type_tmpl inputbox"', 'value', 'text', $selectedContent);
-        $tplCatSelect = JHTML::_('select.genericlist', $options, 'jform[params][content_types]['.$id.'][category_tmpl]', 'class="category_type_tmpl inputbox"', 'value', 'text', $selectedCat);
+        $tplContentSelect = JHTML::_('select.genericlist', $options, 'jform[params][category_types]['.$id.'][content_tmpl]', 'class="content_type_tmpl inputbox"', 'value', 'text', $selectedContent);
+        $tplCatSelect = JHTML::_('select.genericlist', $options, 'jform[params][category_types]['.$id.'][category_tmpl]', 'class="category_type_tmpl inputbox"', 'value', 'text', $selectedCat);
 
         $html = <<<HTML
-        <div id="content_type_$id" class="content_type_contayner">
+        <div id="{$this->prefix}_type_$id" class={$this->prefix}_type_contayner">
         <div class="control-group" style="width: 50%; float: left;">
         	<div class="control-label">
                 <label>$name</label>
@@ -114,7 +115,7 @@ HTML;
         	<div class="controls">
                 <input
                     type="text"
-                    name="jform[params][content_types][$id][name]"
+                    name="jform[params][{$this->prefix}_types][$id][name]"
                     value="{$tname}"
                     size="20"
                     class="name inputbox"
@@ -126,9 +127,9 @@ HTML;
         </div>
         <div class="control-group" style="width: 50%; float: left;">
         	<div class="control-label">
-                <label>$tplContent</label>
+                <label>$tplCat</label>
         	</div>
-        	<div class="controls">$tplContentSelect</div>
+        	<div class="controls">$tplCatSelect</div>
         </div>
         <div class="control-group" style="width: 50%; float: left;">
         	<div class="control-label">
@@ -137,19 +138,13 @@ HTML;
         	<div class="controls">
                 <input
                     type="text"
-                    name="jform[params][content_types][$id][title]"
+                    name="jform[params][{$this->prefix}_types][$id][title]"
                     value="{$ttitle}"
                     size="20"
                     class="title inputbox"
                     aria-invalid="false"
                     />
         	</div>
-        </div>
-        <div class="control-group" style="width: 50%; float: left;">
-        	<div class="control-label">
-                <label>$tplCat</label>
-        	</div>
-        	<div class="controls">$tplCatSelect</div>
         </div>
         <hr style="clear: both"/>
 HTML;
@@ -168,7 +163,7 @@ HTML;
             type="button"
             class="btn btn-danger del-button"
             value="$del"
-            onclick="contentTypeDel('content_type_$id', 'content')"
+            onclick="contentTypeDel('{$this->prefix}_type_$id', '{$this->prefix}')"
             />
         </div>
 HTML;
@@ -178,13 +173,10 @@ HTML;
     function loadField($typeId, $type, $field)
     {
         $fieldName = $field->name;
-        $checkedCat = (!empty($type->fields->$fieldName->category)) ? ' checked="checked"' : '';
-        $checkedContent = (!empty($type->fields->$fieldName->content)) ? ' checked="checked"' : '';
-        $cat = JText::_('PLG_MINICCK_CAT');
-        $content = JText::_('PLG_MINICCK_CONTENT');
-        $tplContent = JText::_('PLG_MINICCK_TYPE_CONTENT_TPL');
-        $tplCat = JText::_('PLG_MINICCK_TYPE_CATEGORY_TPL');
-        $fname = "jform[params][content_types][$typeId][fields][$fieldName]";
+        $checkedCat = (!empty($type->fields->$fieldName->show)) ? ' checked="checked"' : '';
+        $show = JText::_('PLG_MINICCK_TYPE_FIELD_SHOW');
+        $tplCat = JText::_('PLG_MINICCK_TYPE_TPL');
+        $fname = "jform[params][{$this->prefix}_types][$typeId][fields][$fieldName]";
         $selectedCatTmpl = (!empty($type->fields->$fieldName->category_tmpl)) ? $type->fields->$fieldName->category_tmpl : '';
         $selectedArticleTmpl = (!empty($type->fields->$fieldName->content_tmpl)) ? $type->fields->$fieldName->content_tmpl : '';
         $catTmpl = JHTML::_('select.genericlist', $this->fieldTemplates[$field->type], $fname.'[category_tmpl]', 'data-field="'.$fieldName.'" class="field_category_type_tmpl inputbox"', 'value', 'text', $selectedCatTmpl);
@@ -197,13 +189,13 @@ HTML;
         	</div>
         	<div class="controls row">
         	    <div class="span1">
-                    <label for="$fieldName-$typeId-category">$cat</label>
+        	        <label for="$fieldName-$typeId-content1" style="width: 100%; max-width: 100%;">$show</label>
                 </div>
                 <div class="span1">
                     <input
                         type="checkbox"
-                        id="$fieldName-$typeId-category"
-                        name="{$fname}[category]"
+                        id="$fieldName-$typeId-category-{$this->prefix}"
+                        name="{$fname}[show]"
                         value="1"
                         class="field_name inputbox"
                         aria-invalid="false"
@@ -211,26 +203,6 @@ HTML;
                         />
                 </div>
         	    <div class="span1">
-        	    <label for="$fieldName-$typeId-content">$content</label>
-                </div>
-        	    <div class="span1">
-                    <input
-                        type="checkbox"
-                        id="$fieldName-$typeId-content"
-                        name="{$fname}[content]"
-                        value="1"
-                        class="field_name inputbox"
-                        aria-invalid="false"
-                        $checkedContent
-                        />
-                </div>
-        	    <div class="span2">
-        	    <label for="$fieldName-$typeId-content1" style="width: 100%; max-width: 100%;">$tplContent</label>
-                </div>
-        	    <div class="span2">
-                    $itemTmpl
-                </div>
-        	    <div class="span2">
         	        <label for="$fieldName-$typeId-content1" style="width: 100%; max-width: 100%;">$tplCat</label>
                 </div>
                 <div class="span2">
@@ -242,9 +214,9 @@ HTML;
         return $html;
     }
 
-    function gerTplOptions()
+    function getTplOptions()
     {
-        $path = JPATH_ROOT . '/plugins/system/minicck/tmpl';
+        $path = JPATH_ROOT . '/plugins/system/minicck/tmpl/'.$this->prefix;
         $options = array();
         $options[] = JHtml::_('select.option', '', JText::_('JOPTION_USE_DEFAULT'));
         $files = JFolder::files($path, '.', false, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX', 'index.html'));

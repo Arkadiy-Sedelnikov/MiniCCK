@@ -28,7 +28,7 @@ class JFormFieldLink extends MiniCCKFields
         return JText::_('PLG_MINICCK_LINK');
     }
 
-    function getInput()
+    function getInput($entityType='content')
     {
         self::loadLang('link');
         $name = $this->attributes['name'];
@@ -37,7 +37,7 @@ class JFormFieldLink extends MiniCCKFields
         $disabled = ($this->attributes['disabled']) ? ' disabled="disabled"' : '';
         $hidden = ($this->attributes['hidden']) ? ' style="display: none;"' : '';
         $value = $this->value;
-        $field = plgSystemMinicck::getCustomField($name);
+        $field = plgSystemMinicck::getCustomField($name, $entityType);
         $fieldname	= $this->name;
         $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
         $html = '<div class="control-group '.$name.'"'.$hidden.'>';
