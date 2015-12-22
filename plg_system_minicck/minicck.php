@@ -8,6 +8,7 @@
 defined('_JEXEC') or die;
 
 jimport('joomla.filesystem.file');
+use \Joomla\String\String;
 
 class plgSystemMinicck extends JPlugin
 {
@@ -211,7 +212,7 @@ class plgSystemMinicck extends JPlugin
             $prefix = 'category';
         }
 
-        if(!$isCategory && !$isContent)
+        if((!$isCategory && !$isContent) || ($isCategory && empty($this->config["params"]->allow_category_fields)))
         {
             return true;
         }
@@ -378,7 +379,8 @@ HTML;
         $isContent = $option == 'com_content' && ( ($isAdmin && $view == 'article') || (!$isAdmin && $view == 'form') ) && $layout === 'edit';
         $isCategory = $isAdmin && $option == 'com_categories' && $extension == 'com_content' && $view == 'category';
 
-        if(!$isContent && !$isCategory){
+        if((!$isCategory && !$isContent) || ($isCategory && empty($this->config["params"]->allow_category_fields)))
+        {
             return;
         }
 
@@ -418,6 +420,31 @@ HTML;
 
     }
 
+    /** Добавляем идентификатор категории в текст т.к. для контентных плагинов он не передается на фронте.
+     * @param $context
+     * @param $article
+     * @param $isNew
+     */
+    public function onContentBeforeSave($context, &$article, $isNew)
+    {
+        $config = $this->config["params"];
+        if(!($context == 'com_categories.category' && $config->allow_category_fields)){
+            return;
+        }
+
+        $data = (isset($_POST['minicck']) && is_array($_POST['minicck']) && count($_POST['minicck'])>0 ) ? $_POST['minicck'] : null;
+
+        $desc = preg_replace('(<div id="category-identifier" style="display: none;">\d+</div>)', '', $article->description);
+        $desc = is_null($desc) ? $article->description : $desc;
+
+        if (!$article->id || !$data || empty($data['content_type']))
+        {
+            $article->description = $desc;
+            return;
+        }
+
+        $article->description = '<div id="category-identifier" style="display: none;">'.$article->id.'</div>'.$desc;
+    }
 
     /** Сохранение данных
      * @param $context
@@ -637,6 +664,7 @@ HTML;
 
         if(($context != 'com_content.article' && $context != 'com_content.category' && $context != 'com_tags.tag' && $context != 'com_content.featured')
             || ($context == 'com_content.category' && !$config->allow_in_category)
+            || ($context == 'com_categories.category' && empty($config->allow_category_fields))
             || ($context == 'com_tags.tag' && !$config->allow_in_tags)
             || ($context == 'com_content.featured' && !$config->allow_in_featured)
             || ($context == 'com_content.article' && !$config->allow_in_content)
@@ -644,7 +672,8 @@ HTML;
             return;
         }
 
-        $isTags = ($context == 'com_tags.tag') ? true : false;
+        $isTags = $context == 'com_tags.tag';
+        $isCategoryEntity = false;
 
         if($isTags && $article->type_alias != 'com_content.article')
         {
@@ -661,12 +690,35 @@ HTML;
         }
         else
         {
-            return;
+
+            if(!empty($article->text) && String::strpos($article->text, '<div id="category-identifier" style="display: none;">') !== false){
+                $isCategoryEntity = true;
+                preg_match('(<div id="category-identifier" style="display: none;">\d+</div>)', $article->text, $matches);
+
+                if(empty($matches[0])){
+                    return;
+                }
+
+                $articleId = (int)strip_tags($matches[0]);
+
+                if($articleId == 0){
+                    return;
+                }
+
+                $desc = preg_replace('(<div id="category-identifier" style="display: none;">\d+</div>)', '', $article->text);
+                $desc = is_null($desc) ? $article->text : $desc;
+                $article->text = $desc;
+            }
+            else
+            {
+                return;
+            }
         }
 
         $body = $isTags ? 'core_body' : 'text';
 
-        $result = $this->getData($articleId);
+        $prefix = $isCategoryEntity ? 'category' : 'content';
+        $result = $this->getData($articleId, $prefix);
 
         if(empty($result))
         {
@@ -675,65 +727,92 @@ HTML;
 
         $result = (object)$result;
 
-        if(!self::$customfields)
-        {
-            $this->setCustomFields();
+        if($isCategoryEntity){
+            if(!self::$categoryCustomfields)
+            {
+                $this->setCustomFields($prefix);
+            }
+            if(!self::$categoryContentTypes)
+            {
+                $this->setContentTypes($prefix);
+            }
+            $contentTypes = self::$categoryContentTypes;
+            $customfields = self::$categoryCustomfields;
+        }
+        else{
+            if(!self::$customfields)
+            {
+                $this->setCustomFields();
+            }
+            if(!self::$contentTypes)
+            {
+                $this->setContentTypes($prefix);
+            }
+            $contentTypes = self::$contentTypes;
+            $customfields = self::$customfields;
         }
 
         $this->context = $context;
         $isCategory = ($this->context == 'com_content.category');
         $context = $isCategory ? 'category' : 'content';
 
-        if(!self::$contentTypes)
-        {
-            $this->setContentTypes();
-        }
-
         $content_type = $result->content_type;
 
-        if(empty(self::$contentTypes[$content_type]))
+        if(empty($contentTypes[$content_type]))
         {
             return;
         }
 
-        $typeFields = self::$contentTypes[$content_type]->fields;
+        $typeFields = $contentTypes[$content_type]->fields;
 
         unset($result->content_type);
 
+        if($isCategoryEntity){
+            $show = 'show';
+        }
+        else{
+            $show = $context;
+        }
+
         foreach($result as $k => $v)
         {
-            if(!isset($typeFields->$k->$context))
+            if(!isset($typeFields->$k->$show))
             {
                 unset($result->$k);
             }
         }
 
-        foreach(self::$customfields as $k => $v)
+        foreach($customfields as $k => $v)
         {
-            if($context == 'content'){
-                self::$customfields[$k]['template'] = (isset($typeFields->$k) && isset($typeFields->$k->content_tmpl))
+            if($prefix == 'content'){
+                $customfields[$k]['template'] = (isset($typeFields->$k) && isset($typeFields->$k->content_tmpl))
                     ? $typeFields->$k->content_tmpl : 'default.php';
             }
             else
             {
-                self::$customfields[$k]['template'] = (isset($typeFields->$k) && isset($typeFields->$k->category_tmpl))
+                $customfields[$k]['template'] = (isset($typeFields->$k) && isset($typeFields->$k->category_tmpl))
                     ? $typeFields->$k->category_tmpl : 'default.php';
             }
         }
 
-        $fields = self::$customfields;
+        if($isCategoryEntity)
+            self::$categoryCustomfields = $customfields;
+        else
+            self::$customfields = $customfields;
 
         if($this->params->get('load_object', 0) == 1)
         {
             include_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
-            $article->minicck = MiniCCKHTML::getInstance(self::$customfields);
+            $article->minicck = MiniCCKHTML::getInstance($customfields);
             $result->content_type = $content_type;
             $article->minicck->set($articleId, $result);
         }
         else
         {
-            $layout = $this->getLayout($content_type);
-            $position = $isCategory ? $this->params->get('position_cat', 'top') : $this->params->get('position_content', 'top');
+            $fields = $customfields;
+
+            $layout = $this->getLayout($content_type, $prefix);
+            $position = $isCategoryEntity ? $this->params->get('position_cat', 'top') : $this->params->get('position_content', 'top');
 
             if($this->params->get('load_css', '1') == 1){
                 $doc = JFactory::getDocument();
@@ -765,36 +844,6 @@ HTML;
             }
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     private function getData($id, $type='')
     {
@@ -945,38 +994,52 @@ HTML;
 
     }
 
-    private function getLayout($contentType)
+    private function getLayout($contentType, $type='content')
     {
-        $isCategory = ($this->context == 'com_content.category');
+        $isCategory = $type == 'category';
 
-        $layout = ($isCategory) ? $this->params->get('layout', 'default_cat.php') : $this->params->get('layout', 'default.php');
+        $layout = ($isCategory) ? $this->params->get('category_layout', 'default_cat.php') : $this->params->get('content_layout', 'default.php');
 
-        if(!self::$contentTypes)
+        if($type == 'content')
         {
-            $this->setContentTypes();
+            if(!self::$contentTypes)
+                $this->setContentTypes();
+            $contentTypes = self::$contentTypes;
+        }
+        else
+        {
+            if(!self::$categoryContentTypes)
+                $this->setContentTypes('category');
+            $contentTypes = self::$categoryContentTypes;
         }
 
-        if($isCategory)
+        if($isCategory){
+            $layout = 'category/';
+            $layout .= !empty($contentTypes[$contentType]->category_tmpl)
+                ? $contentTypes[$contentType]->category_tmpl : $layout;
+        }
+        else if($isCategory)
         {
-            if(!empty(self::$contentTypes[$contentType]->category_tmpl))
+            if(!empty($contentTypes[$contentType]->category_tmpl))
             {
-                $layout = self::$contentTypes[$contentType]->category_tmpl;
+                $layout = $contentTypes[$contentType]->category_tmpl;
             }
         }
         else
         {
-            if(!empty(self::$contentTypes[$contentType]->content_tmpl))
+            if(!empty($contentTypes[$contentType]->content_tmpl))
             {
-                $layout = self::$contentTypes[$contentType]->content_tmpl;
+                $layout = $contentTypes[$contentType]->content_tmpl;
             }
         }
 
         return $layout;
     }
 
-    private function getValue($fname, $value)
+    private function getValue($fname, $value, $type='content')
     {
-        $field = self::getCustomField($fname);
+        $field = self::getCustomField($fname, $type);
+
         $className = $this->loadElement($field);
 
         if($className != false && method_exists($className,'getValue'))

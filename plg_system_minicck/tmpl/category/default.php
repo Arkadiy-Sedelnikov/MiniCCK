@@ -14,7 +14,7 @@ defined('_JEXEC') or die;
         foreach ($result as $attr => $value) :
             $field = $fields[$attr];
             $label = $field['title'];
-            $val = $this->getValue($attr, $value);
+            $val = $this->getValue($attr, $value, $prefix);
             ?>
             <li>
                 <div>

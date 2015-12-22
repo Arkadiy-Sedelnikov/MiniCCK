@@ -103,13 +103,13 @@
                 <field
                         name="category_layout"
                         type="filelist"
-                        directory="/plugins/system/minicck/tmpl"
+                        directory="/plugins/system/minicck/tmpl/category"
                         default="default_cat.php"
                         hide_none="1"
                         hide_default="1"
                         exclude=".html"
-                        label="PLG_MINICCK_CATEGORY_LAYOUT"
-                        description="PLG_MINICCK_CATEGORY_LAYOUT_DESC" />
+                        label="PLG_MINICCK_CATEGORY_ENTITY_LAYOUT"
+                        description="PLG_MINICCK_CATEGORY_ENTITY_LAYOUT_DESC" />
                 <field
                         name="load_object"
                         type="radio"
@@ -135,8 +135,8 @@
                         type="radio"
                         class="btn-group"
                         default="top"
-                        label="PLG_MINICCK_POSITION_CAT"
-                        description="PLG_MINICCK_POSITION_CAT_DESC">
+                        label="PLG_MINICCK_POSITION_CAT_ENTITY"
+                        description="PLG_MINICCK_POSITION_CAT_ENTITY_DESC">
                     <option value="top">TOP</option>
                     <option value="bottom">BOTTOM</option>
                 </field>
