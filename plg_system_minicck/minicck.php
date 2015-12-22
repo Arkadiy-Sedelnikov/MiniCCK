@@ -803,9 +803,20 @@ HTML;
         if($this->params->get('load_object', 0) == 1)
         {
             include_once JPATH_ROOT . '/plugins/system/minicck/classes/html.class.php';
-            $article->minicck = MiniCCKHTML::getInstance($customfields);
+            include_once JPATH_ROOT . '/plugins/system/minicck/classes/categorydata.class.php';
             $result->content_type = $content_type;
-            $article->minicck->set($articleId, $result);
+            if($isCategoryEntity)
+            {
+                $CategoryData = MiniCCKCategoryData::getInstance();
+                $CategoryData->setData($articleId, $customfields, $result);
+            }
+            else
+            {
+                $article->minicck = MiniCCKHTML::getInstance($customfields);
+                $article->minicck->set($articleId, $result);
+            }
+
+
         }
         else
         {
