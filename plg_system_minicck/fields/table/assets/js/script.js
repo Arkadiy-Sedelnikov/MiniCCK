@@ -13,7 +13,11 @@ function tableADDRow(element, $id, $fieldname, $name, countColumns) {
     }
 
     var rowId = 'tr_'+$id+'_'+newRowNum;
-    row.attr('id', rowId);
+    row.attr('id', rowId).addClass('sortable dndlist-sortable');
+
+    jQuery('<td/>')
+        .html('<span class="sortable-handler" style="cursor: move;"><span class="icon-menu"></span></span>')
+        .appendTo(row);
 
     for(i=0;i<countColumns;i++)
     {
@@ -22,9 +26,10 @@ function tableADDRow(element, $id, $fieldname, $name, countColumns) {
             .attr('cols', minicckFieldTableSettings.cols)
             .attr('rows', minicckFieldTableSettings.rows);
 
-        td = jQuery('<td/>').append(input).appendTo(row);
+        jQuery('<td/>').append(input).appendTo(row);
     }
-    td = jQuery('<td/>')
+
+    jQuery('<td/>')
         .append(
         jQuery('<a/>')
             .attr('href', '#')

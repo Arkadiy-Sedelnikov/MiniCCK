@@ -38,10 +38,14 @@ class JFormFieldTable extends MiniCCKFields
         $field = plgSystemMinicck::getCustomField($name, $entityType);
         $params = $field['extraparams'];
 
+        $fieldname	= $this->name;
+        $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
+
         if(!defined('PLG_MINICCK_TABLE_LOADED')){
             define('PLG_MINICCK_TABLE_LOADED', 1);
             JHtml::_('behavior.modal');
             JHtml::_('behavior.framework');
+            JHtml::_( 'sortablelist.sortable', $id, '', 'asc', '');
             $doc = JFactory::getDocument();
             $doc->addScript(JUri::root().'plugins/system/minicck/fields/table/assets/js/script.js');
             $doc->addScriptDeclaration('
@@ -64,8 +68,6 @@ class JFormFieldTable extends MiniCCKFields
             return 'Headers not set';
         }
 
-        $fieldname	= $this->name;
-        $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
         $html = '
             <div class="control-group '.$name.'"'.$hidden.'>
                 <label class="control-label" title="" >'.$label.'</label>
@@ -79,6 +81,12 @@ class JFormFieldTable extends MiniCCKFields
                 </a>
             ';
         $html .= '<table id="'.$id.'" class="table"><thead><tr>';
+        $html .= '
+                <th>
+                    <span title="" class="sortable-handler inactive tip-top hasTooltip">
+						<span class="icon-menu"></span>
+					</span>
+				</th>';
         foreach($headers as $header){
             $html .= '<th>'.$header.'</th>';
         }
@@ -90,7 +98,13 @@ class JFormFieldTable extends MiniCCKFields
             $k = 0;
             foreach($value as $v)
             {
-                $html .= '<tr id="tr_'.$id.'_'.$k.'">';
+                $html .= '<tr class="sortable" id="tr_'.$id.'_'.$k.'">';
+                $html .= '
+                <td>
+                    <span class="sortable-handler" style="cursor: move;">
+					    <span class="icon-menu"></span>
+					</span>
+				</td>';
                 for($i=0;$i<$countHeaders;$i++){
                     $html .= '<td><textarea name="'.$fieldname.'['.$k.']['.$i.']" cols="'.$params->cols.'" rows="'.$params->rows.'">'.$v[$i].'</textarea></td>';
                 }
