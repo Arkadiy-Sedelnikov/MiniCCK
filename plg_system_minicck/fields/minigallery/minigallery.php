@@ -115,7 +115,7 @@ class JFormFieldMinigallery extends MiniCCKFields
             return '';
         }
 
-        $value = json_decode($value);
+        $value = (array)json_decode($value);
 
         if(!is_array($value) || !count($value))
         {
