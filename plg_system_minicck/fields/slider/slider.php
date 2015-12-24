@@ -29,11 +29,20 @@ class JFormFieldSlider extends MiniCCKFields
 
     function getInput($entityType='content')
     {
+        $fieldname	= $this->name;
+        $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
+
         if(!defined('PLG_MINICCK_SLIDER_LOADED')){
             define('PLG_MINICCK_SLIDER_LOADED', 1);
             JHtml::_('behavior.modal');
             JHtml::_('behavior.framework');
+            JHtml::_('jquery.ui', array('core', 'sortable'));
             JFactory::getDocument()->addScript(JUri::root().'plugins/system/minicck/fields/slider/assets/js/script.js');
+            JFactory::getDocument()->addScriptDeclaration('
+                jQuery(function($) {
+                    $( ".sortable-minicck-slider" ).sortable();
+                });
+            ');
         }
 
         self::loadLang('slider');
@@ -46,8 +55,7 @@ class JFormFieldSlider extends MiniCCKFields
         $value = json_decode($this->value, true);
         $field = plgSystemMinicck::getCustomField($name, $entityType);
         $directory = trim($field["params"]);
-        $fieldname	= $this->name;
-        $id = str_replace(array('][',']','['), array('_', '', '_'), $fieldname);
+
 
         $html = '
             <div class="control-group '.$name.'"'.$hidden.'>
@@ -60,6 +68,7 @@ class JFormFieldSlider extends MiniCCKFields
                     return false;">
                     '.JText::_('PLG_MINICCK_SLIDER_ADD_FIELD').'
                 </a>
+                <div class="sortable-minicck-slider" id="sortable-'.$id.'">
             ';
         if(count($value)>0)
         {
@@ -69,6 +78,9 @@ class JFormFieldSlider extends MiniCCKFields
 
                 $html .= '
                 <div class="minicck_slider" style="margin-bottom: 5px">
+                    <span style="cursor: move;" class="sortable-handler">
+					    <span class="icon-menu"></span>
+					</span>
                     <input type="text" placeholder="image" id="'.$id.'_'.$k.'_image" name="'.$fieldname.'['.$k.'][image]" value="'.$v['image'].'" class="input-big '.$name.'"'.$disabled.'/>
                     <a class="modal btn" title="' . JText::_('JLIB_FORM_BUTTON_SELECT') . '" href="'
                     .  'index.php?option=com_media&amp;view=images&amp;tmpl=component&amp;asset=com_content&amp;author=&amp;fieldid=' . $id.'_'.$k . '_image&amp;folder=' . $directory . '"'
@@ -86,11 +98,12 @@ class JFormFieldSlider extends MiniCCKFields
         }
          $html .= '
                 </div>
+                </div>
             </div>';
         return $html;
     }
 
-    /** Р¤СЂРѕРЅС‚
+    /** Фронт
      * @param $field
      * @param $value
      * @return string
@@ -139,7 +152,7 @@ class JFormFieldSlider extends MiniCCKFields
         return $value;
     }
 
-    /** Р”РѕР±Р°РІР»СЏРµРј РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РІ РЅР°СЃС‚СЂРѕР№РєРё РїРѕР»РµР№
+    /** Добавляем дополнительные параметры в настройки полей
      * @return string
      */
     static function extraOptions($json = false)
