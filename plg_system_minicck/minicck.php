@@ -67,7 +67,7 @@ class plgSystemMinicck extends JPlugin
         }
 
         $params = json_decode($table->params);
-        $customfields = isset($params->customfields) ? $params->customfields : null;
+        $customfields = isset($params->customfields) ? (array)$params->customfields : null;
         $categoryCustomfields = isset($params->category_customfields) ? $params->category_customfields : null;
         $content_types = isset($params->content_types) ? $params->content_types : null;
         $category_types = isset($params->category_types) ? $params->category_types : null;
@@ -1120,12 +1120,12 @@ HTML;
         switch($type)
         {
             case 'category':
-                $customfields = $params->category_customfields;
+                $customfields = (array)$params->category_customfields;
                 $table = '#__minicck_category_fields';
                 $msgPrefix = 'Category';
                 break;
             default:
-                $customfields = $params->customfields;
+                $customfields = (array)$params->customfields;
                 $table = '#__minicck';
                 $msgPrefix = '';
                 break;
