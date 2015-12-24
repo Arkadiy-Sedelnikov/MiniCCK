@@ -118,7 +118,7 @@ class JFormFieldTable extends MiniCCKFields
         return $html;
     }
 
-    /** Р¤СЂРѕРЅС‚
+    /** Фронт
      * @param $field
      * @param $value
      * @return string
@@ -172,7 +172,7 @@ class JFormFieldTable extends MiniCCKFields
         return $value;
     }
 
-    /** Р”РѕР±Р°РІР»СЏРµРј РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РІ РЅР°СЃС‚СЂРѕР№РєРё РїРѕР»РµР№
+    /** Добавляем дополнительные параметры в настройки полей
      * @return string
      */
     static function extraOptions($json = false)

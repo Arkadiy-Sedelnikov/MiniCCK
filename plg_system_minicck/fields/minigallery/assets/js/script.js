@@ -20,6 +20,9 @@ function minigalleryADDField(element, $id, $fieldname, $name, $directory) {
     var $k = jQuery('div.minicck_minigallery', parent).length;
     var div = '' +
         '<div class="minicck_minigallery" style="margin-bottom: 5px">' +
+            '<span style="cursor: move;" class="sortable-handler">' +
+                '<span class="icon-menu"></span>' +
+            '</span>' +
         '<input type="text" placeholder="image" id="'+$id+'_'+$k+'_image" name="'+$fieldname+'['+$k+'][image]" value="" class="input-big '+$name+'"/>' +
         '<a class="modal btn" ' +
         'title="Select Image" ' +
@@ -32,7 +35,7 @@ function minigalleryADDField(element, $id, $fieldname, $name, $directory) {
         '<input type="text" placeholder="alt" id="'+$id+'_'+$k+'_alt" name="'+$fieldname+'['+$k+'][alt]" value="" class="input-big '+$name+'"/>' +
         '</div>';
 
-    jQuery('div.controls', parent).append(div);
+    jQuery('div.sortable-minicck-gallery', parent).append(div).sortable();
 
     SqueezeBox.initialize({});
     SqueezeBox.assign(jQuery('a.modal:last', parent).get(), {
