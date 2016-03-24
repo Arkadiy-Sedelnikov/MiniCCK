@@ -8,7 +8,7 @@
 defined('_JEXEC') or die;
 
 jimport('joomla.filesystem.file');
-use \Joomla\String\String;
+use Joomla\String\StringHelper;
 
 class plgSystemMinicck extends JPlugin
 {
@@ -691,7 +691,7 @@ HTML;
         else
         {
 
-            if(!empty($article->text) && String::strpos($article->text, '<div id="category-identifier" style="display: none;">') !== false){
+            if(!empty($article->text) && StringHelper::strpos($article->text, '<div id="category-identifier" style="display: none;">') !== false){
                 $isCategoryEntity = true;
                 preg_match('(<div id="category-identifier" style="display: none;">\d+</div>)', $article->text, $matches);
 
