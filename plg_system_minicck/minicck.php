@@ -1244,6 +1244,7 @@ HTML;
         $filterArticles = $catArticles = array();
 
         $enableFilter = count($filterData) > 0;
+        $isFilteredInput = false;
 
         if($enableFilter)
         {
@@ -1263,10 +1264,14 @@ HTML;
 
                 $className = $this->loadElement($field);
 
-                if($className != false && method_exists($className,'buildQuery'))
+
+                if($className == false || !method_exists($className,'buildQuery') || $v == '')
                 {
-                    $className::buildQuery($query, $k, $v);
+                    continue;
                 }
+
+                $isFilteredInput = true;
+                $className::buildQuery($query, $k, $v, self::$customfields[$k]);
             }
 
             $filterArticles = $db->setQuery($query)->loadColumn();
@@ -1296,12 +1301,18 @@ HTML;
             $result = array();
         }
 
-        if(count($result))
+        if(count($result) || $isFilteredInput)
         {
             if($enable_multi_categories)
             {
                 $itemsModel->setState('filter.category_id', '');
             }
+
+            if(!count($result))
+            {
+                $result = array(0);
+            }
+
             $itemsModel->setState('filter.article_id.include', true);
             $itemsModel->setState('filter.article_id', $result);
         }

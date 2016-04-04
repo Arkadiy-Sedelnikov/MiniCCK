@@ -135,7 +135,7 @@ class JFormFieldMcselect extends MiniCCKFields
 
     static function buildQuery(&$query, $fieldName, $value, $type = 'eq')
     {
-        parent::buildQuery($query, $fieldName, $value, 'find_in_set_multi');
+        parent::buildQuery($query, $fieldName, $value, 'find_in_set');
     }
 
     /** Добавляем дополнительные параметры в настройки полей
