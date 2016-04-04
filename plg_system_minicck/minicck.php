@@ -1334,7 +1334,8 @@ HTML;
             return;
         }
 
-        require_once JPATH_ROOT.'/plugins/system/minicck/classes/category.php';
+        $suffix = version_compare(JVERSION, '3.5.0', '<') ? '' : '35';
+        require_once JPATH_ROOT.'/plugins/system/minicck/classes/category'.$suffix.'.php';
     }
 
 

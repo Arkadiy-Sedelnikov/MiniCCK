@@ -176,12 +176,11 @@ HTML;
         $checkedCat = (!empty($type->fields->$fieldName->show)) ? ' checked="checked"' : '';
         $show = JText::_('PLG_MINICCK_TYPE_FIELD_SHOW');
         $tplCat = JText::_('PLG_MINICCK_TYPE_TPL');
+        $fieldTemplates = isset($this->fieldTemplates[$field->type]) ? $this->fieldTemplates[$field->type] : array();
         $fname = "jform[params][{$this->prefix}_types][$typeId][fields][$fieldName]";
         $selectedCatTmpl = (!empty($type->fields->$fieldName->category_tmpl)) ? $type->fields->$fieldName->category_tmpl : '';
         $selectedArticleTmpl = (!empty($type->fields->$fieldName->content_tmpl)) ? $type->fields->$fieldName->content_tmpl : '';
-        $catTmpl = JHTML::_('select.genericlist', $this->fieldTemplates[$field->type], $fname.'[category_tmpl]', 'data-field="'.$fieldName.'" class="field_category_type_tmpl inputbox"', 'value', 'text', $selectedCatTmpl);
-        $itemTmpl = JHTML::_('select.genericlist', $this->fieldTemplates[$field->type], $fname.'[content_tmpl]', 'data-field="'.$fieldName.'" class="field_article_type_tmpl inputbox"', 'value', 'text', $selectedArticleTmpl);
-
+        $catTmpl = JHTML::_('select.genericlist', $fieldTemplates, $fname.'[category_tmpl]', 'data-field="'.$fieldName.'" class="field_category_type_tmpl inputbox"', 'value', 'text', $selectedCatTmpl);
         $html = <<<HTML
         <div class="control-group">
         	<div class="control-label">

@@ -103,7 +103,7 @@ class JFormFieldMinigallery extends MiniCCKFields
         return $html;
     }
 
-    /** Фронт
+    /** Р¤СЂРѕРЅС‚
      * @param $field
      * @param $value
      * @return string
@@ -148,7 +148,7 @@ class JFormFieldMinigallery extends MiniCCKFields
         return $value;
     }
 
-    /** Добавляем дополнительные параметры в настройки полей
+    /** Р”РѕР±Р°РІР»СЏРµРј РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РІ РЅР°СЃС‚СЂРѕР№РєРё РїРѕР»РµР№
      * @return string
      */
     static function extraOptions($json = false)
