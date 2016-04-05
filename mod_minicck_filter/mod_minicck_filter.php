@@ -11,6 +11,7 @@ defined('_JEXEC') or die;
 
 // Include the helper.
 require_once __DIR__ . '/helper.php';
+require_once JPATH_ROOT. '/components/com_content/helpers/route.php';
 
 $app = JFactory::getApplication();
 $input = $app->input;
@@ -36,8 +37,7 @@ if($option != 'com_content' || (!in_array($catid, $allowedCats) && $allowedCats[
 
 JHtml::_('behavior.framework');
 
-$url = JUri::getInstance();
-$action = $url->toString();
+$action = JRoute::_(ContentHelperRoute::getCategoryRoute($catid));
 
 if(count($minicckfilter))
 {
