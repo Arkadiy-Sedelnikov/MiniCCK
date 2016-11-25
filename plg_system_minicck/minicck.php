@@ -342,17 +342,18 @@ HTML;
                 }
 
                 $attributes = array();
-                $attributes['name'] = $customfield['name'];
+                $customfieldName = $customfield['name'];
+                $attributes['name'] = $customfieldName;
                 $attributes['label'] = $customfield['title'];
                 $attributes['type'] = $customfield['type'];
                 $attributes['disabled'] = $attributes['hidden'] = false;
 
-                if(empty($contentType) || !isset($contentTypeFields->$customfield['name']))
+                if(empty($contentType) || !isset($contentTypeFields->$customfieldName))
                 {
                     $attributes['disabled'] = $attributes['hidden'] = true;
                 }
 
-                $value = (isset($dataMinicck[$customfield['name']])) ? $dataMinicck[$customfield['name']] : null;
+                $value = (isset($dataMinicck[$customfieldName])) ? $dataMinicck[$customfieldName] : null;
 
                 $element = new $className('minicck['.$attributes['name'].']', $attributes, $value);
 
