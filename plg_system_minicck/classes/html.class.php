@@ -39,6 +39,19 @@ class MiniCCKHTML
         return !empty($this->data->$articleId->content_type) ? $this->data->$articleId->content_type : '';
     }
 
+    public function getArticleFieldsArray($articleId)
+    {
+        $oArticle = $this->get($articleId);
+        if(!is_object($oArticle)){
+            return array();
+        }
+        $aArticle = (array)$oArticle;
+        if (isset($aArticle['content_type'])){
+            unset($aArticle['content_type']);
+        }
+        return $aArticle;
+    }
+
     public function get($articleId)
     {
         return isset($this->data->$articleId) ? $this->data->$articleId : null;
