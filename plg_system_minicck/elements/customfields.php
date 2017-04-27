@@ -19,8 +19,14 @@ class JFormFieldCustomfields extends JFormField
     function getInput()
     {
         JHtml::_('behavior.framework');
+        JHtml::_('jquery.ui', array('core', 'sortable'));
         $doc = JFactory::getDocument();
         $doc->addScript(JUri::root() . 'plugins/system/minicck/assets/js/minicck_jq.js');
+        $doc->addScriptDeclaration('
+        jQuery(function($) {
+                    $( "#minicckCustomfields" ).sortable();
+                });
+        ');
         $htmlClass = new MiniCCKHTML(0,'');
         $numFields = 1;
 
@@ -131,7 +137,8 @@ HTML;
                     foreach($extraOptionsSettings[$custom->type] as $extraparam)
                     {
                         $default = isset($extraparam['value']) ? $extraparam['value'] : '';
-                        $value = isset($custom->extraparams->$extraparam['name']) ? $custom->extraparams->$extraparam['name'] : $default;
+                        $extraparamName = $extraparam['name'];
+                        $value = isset($custom->extraparams->$extraparamName) ? $custom->extraparams->$extraparamName : $default;
 
                         $attr = '';
                         if(isset($extraparam['attr']) && is_array($extraparam['attr']) && count($extraparam['attr']))
@@ -145,7 +152,7 @@ HTML;
 
                         if($extraparam['type'] == 'textarea')
                         {
-                            $input = '<textarea name="jform[params][customfields]['.$k.'][extraparams]['.$extraparam['name'].']" '.$attr.'>'.$value.'</textarea>';
+                            $input = '<textarea name="jform[params][customfields]['.$k.'][extraparams]['.$extraparamName.']" '.$attr.'>'.$value.'</textarea>';
                         }
                         else if($extraparam['type'] == 'select')
                         {
@@ -160,11 +167,11 @@ HTML;
 
                             $value = ($value == '') ? 0 : $value;
 
-                            $input = JHTML::_('select.genericlist', $options, 'jform[params][customfields][' . $k . '][extraparams]['.$extraparam['name'].']', $attr, 'value', 'text', $value);
+                            $input = JHTML::_('select.genericlist', $options, 'jform[params][customfields][' . $k . '][extraparams]['.$extraparamName.']', $attr, 'value', 'text', $value);
                         }
                         else
                         {
-                            $input = '<input type="'.$extraparam['type'].'" name="jform[params][customfields]['.$k.'][extraparams]['.$extraparam['name'].']" value="'.$value.'" '.$attr.'/>';
+                            $input = '<input type="'.$extraparam['type'].'" name="jform[params][customfields]['.$k.'][extraparams]['.$extraparamName.']" value="'.$value.'" '.$attr.'/>';
                         }
                         $extraparams .= <<<HTML
                         <div class="control-group">
