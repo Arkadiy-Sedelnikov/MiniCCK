@@ -81,7 +81,7 @@ HTML;
         if (empty($pluginParams->customfields))
         {
             $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][0][type]', 'class="type inputbox" onchange="loadExtraFields(this, 0, \'content\')"', 'value', 'text');
-            $html .= JHtml::_('bootstrap.addSlide', 'minicckCustomfields', 'field_0', 'collapse0');
+            $html .= JHtml::_('bootstrap.addSlide', 'minicckCustomfields', '<span class="sortable-handler" style="cursor: move;"><span class="icon-menu" aria-hidden="true"></span></span>field_0', 'collapse0');
             $html .= <<<HTML
 <div id="field_0" class="field_contayner">
 <hr style="clear:both"/>
@@ -187,7 +187,7 @@ HTML;
                 }
 
                 $selectType = JHTML::_('select.genericlist', $typeOptions, 'jform[params][customfields][' . $k . '][type]', 'class="type inputbox" onchange="loadExtraFields(this, '.$k.', \'content\')"', 'value', 'text', $custom->type);
-                $html .= JHtml::_('bootstrap.addSlide', 'minicckCustomfields', $custom->title, 'collapse' . $k);
+                $html .= JHtml::_('bootstrap.addSlide', 'minicckCustomfields', '<span class="sortable-handler" style="cursor: move;"><span class="icon-menu" aria-hidden="true"></span></span>'.$custom->title, 'collapse' . $k);
                 $html .= <<<HTML
 <div id="field_$k" class="field_contayner">
 <div style="width: 50%; float: left">

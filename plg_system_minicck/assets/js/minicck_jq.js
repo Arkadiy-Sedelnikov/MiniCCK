@@ -16,7 +16,7 @@ function fieldAdd(tab)
     var newField = field.clone();
 
     jQuery('.accordion-heading a', newField)
-        .text('New field')
+        .html('<span class="sortable-handler" style="cursor: move;"><span class="icon-menu" aria-hidden="true"></span></span>New field')
         .attr('href','#'+prefix+'collapse'+numFields);
 
     jQuery('.accordion-body', newField)
