@@ -47,12 +47,20 @@ class JFormFieldArticle extends MiniCCKFields
 
         JHtml::_('jquery.framework');
         JHtml::_('behavior.modal', 'a.modal-button');
-        JFactory::getDocument()->addScript(JUri::root().'plugins/system/minicck/fields/article/assets/js/field_article.js');
-        JFactory::getDocument()->addScriptDeclaration('var minicckFieldArticleName	= "'.$this->name.'";');
 
+        JFactory::getDocument()->addScriptDeclaration('
+            function minicckFieldArticleAdd_'.$name.'(id, title, catid, object, link, lang)
+            {
+                var div = jQuery(\'#minicck-field-article-articles-'.$name.'\');
+                var span = jQuery(\'<span>\').attr(\'onclick\', \'jQuery(this).parents("div.article").remove();\').text(\' x\');
+                var input = jQuery(\'<input>\').attr(\'type\', \'hidden\').attr(\'name\', \''.$fieldname.'[]\').val(id);
+                var article = jQuery(\'<div>\').addClass(\'article btn btn-small btn-success\').text(title).append(span).append(input);
+                div.append(article);
+            }
+        ');
 
         $class = 'btn modal-button';
-        $link = 'index.php?option=com_content&amp;view=articles&amp;layout=modal&amp;function=minicckFieldArticleAdd&amp;tmpl=component&amp;' . JSession::getFormToken() . '=1';
+        $link = 'index.php?option=com_content&amp;view=articles&amp;layout=modal&amp;function=minicckFieldArticleAdd_'.$name.'&amp;tmpl=component&amp;' . JSession::getFormToken() . '=1';
         $options = "{handler: 'iframe', size: {x: 800, y: 500}}";
 
 
@@ -61,13 +69,13 @@ class JFormFieldArticle extends MiniCCKFields
 		        <span class="icon-save-copy"></span> '.JText::_('PLG_MINICCK_ARTICLE_ADD').'
 	        </a>
 	        <br><br>
-            <div id="minicck-field-article-articles">';
+            <div id="minicck-field-article-articles-'.$name.'">';
         if(is_array($value) && count($value)){
             $titles = $this->getTitles($value);
             foreach ($value as $id){
                 $html .= '
                 <div class="article btn btn-small btn-success">'
-                    .$titles[$id].'<span onclick="fieldArticleRemoveArticle(this)"> x</span>
+                    .$titles[$id].'<span onclick="jQuery(this).parents(\'div.article\').remove();"> x</span>
                     <input name="'.$this->name.'[]" value="'.$id.'" type="hidden">
                 </div>';
             }
