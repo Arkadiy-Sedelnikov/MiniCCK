@@ -14,6 +14,7 @@ class JFormFieldFiles extends MiniCCKFields
     var $value = null;
     var $name = null;
     static $columnType = 'text';
+    protected $uid;
 
     function __construct($name, $attributes, $value){
         $this->attributes = $attributes;
@@ -210,7 +211,7 @@ class JFormFieldFiles extends MiniCCKFields
                             continue;
                         }
                         $fpath = $dir . DIRECTORY_SEPARATOR . $name;
-                        $fpath = str_replace(JPATH_ROOT.'/', '', $fpath);
+                        $fpath = str_replace(str_replace('\\', '/', JPATH_ROOT).'/', '', str_replace('\\', '/', $fpath));
                         $ext = substr(strrchr($name, '.'), 1);
                         $html .= '<li class="av-folderlist-item av-folderlist-file' . ($ext ? ' av-folderlist-file-' . $ext : '') . '"><span class="av-folderlist-label" style="cursor: pointer;" onclick="selectThisFile_'.$fieldName.'(\'' . $fpath . '\')">' . $name . '</span></li>';
                     }
